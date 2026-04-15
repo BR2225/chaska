@@ -1,0 +1,136 @@
+{
+  "theme": "light",
+  "archetype": "1 (Organic & Earthy)",
+  "design_philosophy": "Warm Italian aesthetic. The design evokes the sensory experience of a rustic yet premium Italian bakery. We prioritize tactile warmth, deep emotional connection through photography, and generous negative space to let the products (Bomboloni & Tiramisu) be the heroes. The admin dashboard shifts to a denser, highly functional layout while maintaining the brand's color palette.",
+  "colors": {
+    "background": {
+      "default": "#FDFBF7",
+      "secondary": "#F4F0E6",
+      "inverse": "#2C241B"
+    },
+    "text": {
+      "primary": "#2C241B",
+      "secondary": "#5C5042",
+      "inverse": "#FDFBF7",
+      "accent": "#D96C4A"
+    },
+    "brand": {
+      "primary": "#D96C4A",
+      "primary_hover": "#C25D3E",
+      "accent": "#8A9A5B",
+      "muted": "#E3DCD2"
+    },
+    "surface": {
+      "card": "#FFFFFF",
+      "admin_sidebar": "#F4F0E6",
+      "border": "#E3DCD2",
+      "input_bg": "#FFFFFF"
+    },
+    "status": {
+      "success": "#4A7c59",
+      "warning": "#E8A317",
+      "error": "#D3494E"
+    }
+  },
+  "typography": {
+    "font_families": {
+      "heading": "Cormorant Garamond, serif",
+      "body": "Outfit, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "sizing": {
+      "h1": "text-5xl sm:text-6xl tracking-tighter leading-none",
+      "h2": "text-3xl sm:text-4xl tracking-tight leading-none",
+      "h3": "text-2xl sm:text-3xl tracking-tight",
+      "h4": "text-xl font-medium",
+      "body_large": "text-lg leading-relaxed",
+      "body": "text-base leading-relaxed",
+      "small": "text-sm uppercase tracking-[0.2em]"
+    },
+    "guidelines": "Headings must never be pure black; always use #2C241B (Espresso). Use 'font-light' or 'font-medium' for H1/H2 in Cormorant Garamond to maintain elegance. Avoid 'font-black'. Overlines must use the 'small' sizing."
+  },
+  "spacing_and_layout": {
+    "marketing": {
+      "section_padding": "py-24 sm:py-32",
+      "container": "max-w-7xl mx-auto px-6 sm:px-8",
+      "grid_bento": "grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12"
+    },
+    "admin": {
+      "section_padding": "py-6",
+      "container": "w-full px-4 sm:px-6",
+      "grid": "grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6"
+    },
+    "components": {
+      "card_padding": "p-6 sm:p-8"
+    }
+  },
+  "surfaces_and_shadows": {
+    "storefront_card": "bg-white rounded-2xl shadow-[0_8px_30px_rgb(44,36,27,0.06)] border border-[#E3DCD2]/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgb(44,36,27,0.1)]",
+    "admin_card": "bg-white rounded-lg border border-[#E3DCD2] shadow-sm",
+    "glass_header": "bg-[#FDFBF7]/80 backdrop-blur-xl border-b border-[#E3DCD2]/50",
+    "overlay": "bg-[#2C241B]/40 backdrop-blur-sm"
+  },
+  "motion_and_interactions": {
+    "hover_state": "transition-colors duration-200 ease-in-out",
+    "button_primary": "bg-[#D96C4A] text-white hover:bg-[#C25D3E] hover:shadow-lg transition-all duration-300 rounded-full px-8 py-3 font-medium",
+    "button_secondary": "bg-transparent text-[#2C241B] border border-[#2C241B] hover:bg-[#2C241B] hover:text-[#FDFBF7] transition-all duration-300 rounded-full px-8 py-3 font-medium",
+    "page_transition": "animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out"
+  },
+  "components": {
+    "strategy": {
+      "storefront": "Use raw HTML/Tailwind for artistic, organic layouts (Hero, Product Grids, Testimonials). Use Shadcn strictly for functional interactions (Cart Sheet, Order Dialog).",
+      "admin": "Use heavily customized Shadcn components (Table, Forms, Cards, Select) modified with warm borders and slight border-radius (rounded-lg)."
+    },
+    "specifics": {
+      "navigation": "Sticky glassmorphism header. Links should be subtle with a Terracotta underline on hover.",
+      "hero": "Full height or 80vh minimum. Background image must have an overlay of bg-[#2C241B]/30. Text aligned left or center, heavily leaning into Cormorant Garamond.",
+      "product_card": "Image dominates (max-h-[300px] object-cover), soft borders, generous internal padding. Action button is secondary until hover.",
+      "cart": "Shadcn Sheet. High contrast checkout button.",
+      "admin_sidebar": "Solid background (#F4F0E6). Active state indicated by #D96C4A left border or background tint."
+    }
+  },
+  "assets": {
+    "icons": {
+      "library": "lucide-react",
+      "stroke_width": 1.5,
+      "guidelines": "Use elegant, thin-line icons. Avoid filled icons unless indicating an active state."
+    },
+    "images": [
+      {
+        "category": "hero",
+        "url": "https://images.unsplash.com/photo-1749996089724-268703b8c4dc?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHwyfHxiYWtlcnklMjBpbnRlcmlvciUyMHdhcm18ZW58MHx8fHwxNzc2MjkxNzM5fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Cozy bakery interior with shelves, warm lighting. Used for the main landing page hero section."
+      },
+      {
+        "category": "product_bomboloni",
+        "url": "https://images.unsplash.com/photo-1608894109526-ea487bf2c02c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHwyfHxib21ib2xvbmklMjBkb251dHxlbnwwfHx8fDE3NzYyOTE3Mjh8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Brown and black donut on white ceramic plate. Used for Bomboloni product showcases."
+      },
+      {
+        "category": "product_tiramisu",
+        "url": "https://images.unsplash.com/photo-1714385905983-6f8e06fffae1?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2ODh8MHwxfHNlYXJjaHwxfHx0aXJhbWlzdSUyMGRlc3NlcnR8ZW58MHx8fHwxNzc2MjkxNzM5fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Piece of cake/tiramisu sitting on top of a white plate. Used for Tiramisu product showcases."
+      },
+      {
+        "category": "background_texture",
+        "url": "https://images.unsplash.com/photo-1764943162758-5724d0cf409b?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1Mjh8MHwxfHNlYXJjaHwxfHxpdGFsaWFuJTIwYmFrZXJ5JTIwY2FmZXxlbnwwfHx8fDE3NzYyOTE3Mjh8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Rustic food context. Can be used for about section or testimonial background with heavy blur/overlay."
+      },
+      {
+        "category": "storefront_mood",
+        "url": "https://images.unsplash.com/photo-1774758951271-e0886de596f7?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHw0fHxiYWtlcnklMjBpbnRlcmlvciUyMHdhcm18ZW58MHx8fHwxNzc2MjkxNzM5fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Dimly lit bakery with pastries. Great for the 'Our Story' or 'Visit Us' location section."
+      }
+    ]
+  },
+  "testing": {
+    "attributes": "All interactive elements (buttons, links, form inputs, cart toggles) MUST include a 'data-testid' attribute in kebab-case based on their role (e.g., 'data-testid=\"add-to-cart-bomboloni\"')."
+  },
+  "instructions_to_main_agent": [
+    "Install Google Fonts 'Cormorant Garamond' and 'Outfit' in the main HTML/CSS file.",
+    "Do NOT use pure black (#000000) anywhere. Default text should be #2C241B.",
+    "Use Shadcn components for complex interactions (Cart, Admin Panel, Checkout) but strip any harsh vercel-like defaults (sharp corners, pure white/black borders). Apply the warm, rounded-lg and earthy borders specified.",
+    "For the marketing pages (home, menu), prioritize pure Tailwind CSS custom layouts to maintain an asymmetric, organic 'bento' feel with generous spacing.",
+    "When applying hero images, always use a minimum bg-[#2C241B]/30 overlay to ensure the Cormorant Garamond text remains perfectly readable."
+  ]
+}
