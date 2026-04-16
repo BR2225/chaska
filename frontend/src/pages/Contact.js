@@ -59,7 +59,7 @@ export default function Contact() {
               {[
                 { icon: MapPin, label: "Address", value: "42 Via Roma, Connaught Place, New Delhi 110001" },
                 { icon: Phone, label: "Phone", value: "+91 98765 43210" },
-                { icon: Mail, label: "Email", value: "hello@dolcevita.in" },
+                { icon: Mail, label: "Email", value: "hello@chaska.in" },
                 { icon: Clock, label: "Hours", value: "Mon-Fri 8AM-10PM | Sat-Sun 9AM-11PM" },
               ].map(({ icon: Icon, label, value }) => (
                 <div key={label} className="flex items-start gap-4">
