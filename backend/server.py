@@ -92,6 +92,11 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
+class RegisterRequest(BaseModel):
+    name: str
+    email: str
+    password: str
+
 class ProductCreate(BaseModel):
     name: str
     category: str
@@ -127,6 +132,28 @@ class OrderStatusUpdate(BaseModel):
     status: str
 
 # --- Auth Routes ---
+@api_router.post("/auth/register")
+async def register(req: RegisterRequest, response: Response):
+    email = req.email.lower().strip()
+    if len(req.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    existing = await db.users.find_one({"email": email})
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    hashed = hash_password(req.password)
+    user_doc = {
+        "email": email, "password_hash": hashed,
+        "name": req.name.strip(), "role": "customer",
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    result = await db.users.insert_one(user_doc)
+    user_id = str(result.inserted_id)
+    access_token = create_access_token(user_id, email)
+    refresh_token = create_refresh_token(user_id)
+    response.set_cookie(key="access_token", value=access_token, httponly=True, secure=False, samesite="lax", max_age=3600, path="/")
+    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=False, samesite="lax", max_age=604800, path="/")
+    return {"id": user_id, "email": email, "name": req.name.strip(), "role": "customer"}
+
 @api_router.post("/auth/login")
 async def login(req: LoginRequest, response: Response):
     email = req.email.lower().strip()
@@ -221,7 +248,7 @@ def send_order_confirmation_email(order_data: dict):
 
 # --- Orders Routes ---
 @api_router.post("/orders")
-async def create_order(order: OrderCreate):
+async def create_order(order: OrderCreate, request: Request):
     order_id = f"ORD-{secrets.token_hex(4).upper()}"
     total = sum(item.get("price", 0) * item.get("quantity", 1) for item in order.items)
     doc = order.model_dump()
@@ -230,11 +257,29 @@ async def create_order(order: OrderCreate):
     doc["status"] = "pending"
     doc["payment_status"] = "pending" if order.payment_method == "razorpay" else "cod"
     doc["created_at"] = datetime.now(timezone.utc).isoformat()
+    # Associate with logged-in user if available
+    try:
+        user = await get_current_user(request)
+        doc["user_id"] = user["_id"]
+        doc["customer_email"] = doc.get("customer_email") or user.get("email", "")
+        doc["customer_name"] = doc.get("customer_name") or user.get("name", "")
+    except Exception:
+        pass
     await db.orders.insert_one(doc)
     doc.pop("_id", None)
-    # Send mock email notification
     send_order_confirmation_email(doc)
     return doc
+
+@api_router.get("/my-orders")
+async def get_my_orders(request: Request):
+    user = await get_current_user(request)
+    user_id = user["_id"]
+    email = user.get("email", "")
+    orders = await db.orders.find(
+        {"$or": [{"user_id": user_id}, {"customer_email": email}]},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    return orders
 
 @api_router.get("/orders")
 async def get_orders(request: Request, status: Optional[str] = None):

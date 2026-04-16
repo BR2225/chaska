@@ -35,10 +35,13 @@ export default function AdminLayout({ children }) {
       <aside className="w-64 bg-[#F4F0E6] border-r border-[#E3DCD2] flex flex-col fixed h-full" data-testid="admin-sidebar">
         <div className="p-6 border-b border-[#E3DCD2]">
           <Link to="/" className="block">
-            <h2 className="font-['Cormorant_Garamond'] text-2xl font-semibold text-[#2C241B]">
-              Chas<span className="text-[#D96C4A]">ka</span>
-            </h2>
-            <p className="text-xs text-[#5C5042] mt-0.5">Admin Panel</p>
+            <div className="flex items-center gap-2.5">
+              <img src="https://customer-assets.emergentagent.com/job_italian-desserts-co/artifacts/776xxbkt_shared%20image.jpeg" alt="Chaska" className="h-10 w-auto rounded-lg" />
+              <div>
+                <h2 className="font-['Boogaloo'] text-xl text-[#2C241B] tracking-wide leading-none">CHASKA</h2>
+                <p className="text-[8px] text-[#5C5042] mt-0.5 uppercase tracking-wider">Admin Panel</p>
+              </div>
+            </div>
           </Link>
         </div>
         <nav className="flex-1 py-4 px-3 space-y-1">

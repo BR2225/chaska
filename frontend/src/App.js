@@ -16,6 +16,8 @@ import AdminProducts from "@/pages/AdminProducts";
 import AdminOrders from "@/pages/AdminOrders";
 import AdminContacts from "@/pages/AdminContacts";
 import TrackOrder from "@/pages/TrackOrder";
+import CustomerAuth from "@/pages/CustomerAuth";
+import MyOrders from "@/pages/MyOrders";
 
 function App() {
   return (
@@ -30,6 +32,8 @@ function App() {
             <Route path="/menu/:id" element={<><Header /><ProductDetail /><Footer /></>} />
             <Route path="/checkout" element={<><Header /><Checkout /><Footer /></>} />
             <Route path="/track-order" element={<><Header /><TrackOrder /><Footer /></>} />
+            <Route path="/login" element={<><Header /><CustomerAuth /><Footer /></>} />
+            <Route path="/my-orders" element={<><Header /><MyOrders /><Footer /></>} />
             <Route path="/contact" element={<><Header /><Contact /><Footer /></>} />
 
             {/* Admin Routes */}

@@ -37,10 +37,9 @@ export default function AdminLogin() {
     <div className="min-h-screen flex items-center justify-center bg-[#F4F0E6] px-6" data-testid="admin-login-page">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="font-['Cormorant_Garamond'] text-4xl font-semibold text-[#2C241B]">
-            Chas<span className="text-[#D96C4A]">ka</span>
-          </h1>
-          <p className="text-sm text-[#5C5042] mt-2">Admin Dashboard</p>
+          <img src="https://customer-assets.emergentagent.com/job_italian-desserts-co/artifacts/776xxbkt_shared%20image.jpeg" alt="Chaska" className="h-16 w-auto mx-auto mb-3 rounded-xl" />
+          <h1 className="font-['Boogaloo'] text-4xl text-[#2C241B] tracking-wide">CHASKA</h1>
+          <p className="text-sm text-[#5C5042] mt-1">Admin Dashboard</p>
         </div>
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-8 shadow-[0_8px_30px_rgb(44,36,27,0.08)] border border-[#E3DCD2]/50" data-testid="admin-login-form">
           <h2 className="font-['Cormorant_Garamond'] text-2xl font-medium text-[#2C241B] mb-6">Sign In</h2>

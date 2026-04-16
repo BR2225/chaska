@@ -8,9 +8,13 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
           {/* Brand */}
           <div className="md:col-span-4">
-            <h3 className="font-['Cormorant_Garamond'] text-3xl font-semibold text-[#FDFBF7] mb-4">
-              Chas<span className="text-[#D96C4A]">ka</span>
-            </h3>
+            <div className="flex items-center gap-3 mb-4">
+              <img src="https://customer-assets.emergentagent.com/job_italian-desserts-co/artifacts/776xxbkt_shared%20image.jpeg" alt="Chaska" className="h-12 w-auto rounded-lg" />
+              <div>
+                <h3 className="font-['Boogaloo'] text-3xl text-[#FDFBF7] tracking-wide leading-none">CHASKA</h3>
+                <span className="text-[9px] uppercase tracking-[0.15em] text-[#E3DCD2]/70">Handmade Bliss on Your Way</span>
+              </div>
+            </div>
             <p className="text-[#E3DCD2]/80 leading-relaxed text-sm">
               Authentic Italian bomboloni and tiramisu, crafted with love using traditional recipes passed down through generations.
             </p>
@@ -62,7 +66,7 @@ export default function Footer() {
 
         <div className="border-t border-[#FDFBF7]/10 mt-12 pt-8 text-center">
           <p className="text-xs text-[#E3DCD2]/50 tracking-wider">
-            &copy; {new Date().getFullYear()} Chaska. All rights reserved. Crafted with amore.
+            &copy; {new Date().getFullYear()} Chaska. All rights reserved. Handmade bliss on your way.
           </p>
         </div>
       </div>

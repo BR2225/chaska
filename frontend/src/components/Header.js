@@ -1,16 +1,19 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ShoppingBag, Menu, X, User } from "lucide-react";
+import { ShoppingBag, Menu, X, User, LogOut, ClipboardList } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import CartSheet from "@/components/CartSheet";
+
+const LOGO_URL = "https://customer-assets.emergentagent.com/job_italian-desserts-co/artifacts/776xxbkt_shared%20image.jpeg";
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { itemCount } = useCart();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
   const isAdmin = location.pathname.startsWith("/admin");
 
@@ -23,13 +26,21 @@ export default function Header() {
     { to: "/contact", label: "Contact" },
   ];
 
+  const handleLogout = async () => { await logout(); };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#FDFBF7]/80 backdrop-blur-xl border-b border-[#E3DCD2]/50" data-testid="main-header">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 flex items-center justify-between h-16 sm:h-20">
-        <Link to="/" className="flex items-center gap-2" data-testid="logo-link">
-          <span className="font-['Cormorant_Garamond'] text-2xl sm:text-3xl font-semibold text-[#2C241B] tracking-tight">
-            Chas<span className="text-[#D96C4A]">ka</span>
-          </span>
+        <Link to="/" className="flex items-center gap-2.5" data-testid="logo-link">
+          <img src={LOGO_URL} alt="Chaska" className="h-10 sm:h-12 w-auto rounded-lg" />
+          <div className="hidden sm:block">
+            <span className="font-['Boogaloo'] text-2xl text-[#2C241B] tracking-wide block leading-none">
+              CHASKA
+            </span>
+            <span className="text-[8px] uppercase tracking-[0.15em] text-[#5C5042] leading-none">
+              Handmade Bliss on Your Way
+            </span>
+          </div>
         </Link>
 
         {/* Desktop Nav */}
@@ -41,7 +52,7 @@ export default function Header() {
               className={`text-sm uppercase tracking-[0.15em] font-medium transition-colors duration-200 hover:text-[#D96C4A] ${
                 location.pathname === l.to ? "text-[#D96C4A]" : "text-[#5C5042]"
               }`}
-              data-testid={`nav-${l.label.toLowerCase()}`}
+              data-testid={`nav-${l.label.toLowerCase().replace(/\s/g, '-')}`}
             >
               {l.label}
             </Link>
@@ -49,14 +60,51 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center gap-3">
+          {/* User Account */}
           {user && user.role === "admin" && (
             <Link to="/admin/dashboard" data-testid="admin-link">
-              <Button variant="ghost" size="sm" className="text-[#5C5042] hover:text-[#D96C4A]">
+              <Button variant="ghost" size="sm" className="text-[#5C5042] hover:text-[#D96C4A] text-xs">
                 <User className="w-4 h-4 mr-1" /> Admin
               </Button>
             </Link>
           )}
 
+          {user && user !== false ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-1.5 p-2 text-[#2C241B] hover:text-[#D96C4A] transition-colors" data-testid="user-menu-btn">
+                  <div className="w-7 h-7 rounded-full bg-[#D96C4A]/10 flex items-center justify-center">
+                    <User className="w-3.5 h-3.5 text-[#D96C4A]" strokeWidth={1.5} />
+                  </div>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 bg-[#FDFBF7] border-[#E3DCD2]">
+                <div className="px-3 py-2">
+                  <p className="text-sm font-medium text-[#2C241B] truncate">{user.name}</p>
+                  <p className="text-xs text-[#5C5042] truncate">{user.email}</p>
+                </div>
+                <DropdownMenuSeparator className="bg-[#E3DCD2]" />
+                {user.role !== "admin" && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/my-orders" className="flex items-center gap-2 cursor-pointer" data-testid="my-orders-link">
+                      <ClipboardList className="w-4 h-4" /> My Orders
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-2 cursor-pointer text-[#D3494E]" data-testid="logout-btn">
+                  <LogOut className="w-4 h-4" /> Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : user === false ? (
+            <Link to="/login" data-testid="login-link">
+              <Button variant="ghost" size="sm" className="text-[#5C5042] hover:text-[#D96C4A] text-xs font-medium">
+                <User className="w-4 h-4 mr-1" /> Login
+              </Button>
+            </Link>
+          ) : null}
+
+          {/* Cart */}
           <Sheet>
             <SheetTrigger asChild>
               <button className="relative p-2 text-[#2C241B] hover:text-[#D96C4A] transition-colors" data-testid="cart-button">
@@ -87,15 +135,16 @@ export default function Header() {
       {mobileOpen && (
         <nav className="md:hidden bg-[#FDFBF7] border-b border-[#E3DCD2] px-6 py-4 space-y-3" data-testid="mobile-nav">
           {navLinks.map(l => (
-            <Link
-              key={l.to}
-              to={l.to}
-              onClick={() => setMobileOpen(false)}
-              className="block text-sm uppercase tracking-[0.15em] font-medium text-[#5C5042] hover:text-[#D96C4A]"
-            >
+            <Link key={l.to} to={l.to} onClick={() => setMobileOpen(false)}
+              className="block text-sm uppercase tracking-[0.15em] font-medium text-[#5C5042] hover:text-[#D96C4A]">
               {l.label}
             </Link>
           ))}
+          {user === false && (
+            <Link to="/login" onClick={() => setMobileOpen(false)} className="block text-sm uppercase tracking-[0.15em] font-medium text-[#D96C4A]">
+              Login / Register
+            </Link>
+          )}
         </nav>
       )}
     </header>
