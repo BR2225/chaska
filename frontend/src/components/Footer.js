@@ -9,7 +9,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:col-span-4">
             <h3 className="font-['Cormorant_Garamond'] text-3xl font-semibold text-[#FDFBF7] mb-4">
-              Dolce<span className="text-[#D96C4A]">Vita</span>
+              Chas<span className="text-[#D96C4A]">ka</span>
             </h3>
             <p className="text-[#E3DCD2]/80 leading-relaxed text-sm">
               Authentic Italian bomboloni and tiramisu, crafted with love using traditional recipes passed down through generations.
@@ -62,7 +62,7 @@ export default function Footer() {
 
         <div className="border-t border-[#FDFBF7]/10 mt-12 pt-8 text-center">
           <p className="text-xs text-[#E3DCD2]/50 tracking-wider">
-            &copy; {new Date().getFullYear()} DolceVita. All rights reserved. Crafted with amore.
+            &copy; {new Date().getFullYear()} Chaska. All rights reserved. Crafted with amore.
           </p>
         </div>
       </div>

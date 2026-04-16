@@ -199,6 +199,26 @@ async def delete_product(product_id: str, request: Request):
         raise HTTPException(status_code=404, detail="Product not found")
     return {"message": "Product deleted"}
 
+# --- Email Notification (Mock/Log) ---
+def send_order_confirmation_email(order_data: dict):
+    """Mock email sender - logs to console. Replace with real email service later."""
+    logger.info("=" * 60)
+    logger.info("ORDER CONFIRMATION EMAIL")
+    logger.info(f"To: {order_data.get('customer_email', 'N/A')}")
+    logger.info(f"Subject: Chaska - Order Confirmation #{order_data['id']}")
+    logger.info("-" * 40)
+    logger.info(f"Hi {order_data['customer_name']},")
+    logger.info(f"Your order #{order_data['id']} has been placed successfully!")
+    logger.info(f"Total: Rs.{order_data['total']}")
+    logger.info(f"Payment: {order_data['payment_method'].upper()}")
+    logger.info(f"Delivery: {order_data['delivery_address']}")
+    logger.info("Items:")
+    for item in order_data.get('items', []):
+        logger.info(f"  - {item['name']} ({item.get('size','')}) x{item['quantity']} = Rs.{item['price'] * item['quantity']}")
+    logger.info(f"Track your order: /track-order (use ID: {order_data['id']})")
+    logger.info("Thank you for choosing Chaska!")
+    logger.info("=" * 60)
+
 # --- Orders Routes ---
 @api_router.post("/orders")
 async def create_order(order: OrderCreate):
@@ -212,6 +232,8 @@ async def create_order(order: OrderCreate):
     doc["created_at"] = datetime.now(timezone.utc).isoformat()
     await db.orders.insert_one(doc)
     doc.pop("_id", None)
+    # Send mock email notification
+    send_order_confirmation_email(doc)
     return doc
 
 @api_router.get("/orders")

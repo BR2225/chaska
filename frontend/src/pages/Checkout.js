@@ -51,7 +51,7 @@ export default function Checkout() {
           amount: rpOrder.data.amount,
           currency: rpOrder.data.currency,
           order_id: rpOrder.data.id,
-          name: "DolceVita",
+          name: "Chaska",
           description: "Italian Desserts Order",
           handler: async (response) => {
             await axios.post(`${API}/api/razorpay/verify`, response);
@@ -95,6 +95,11 @@ export default function Checkout() {
           <Link to="/menu">
             <Button className="bg-[#D96C4A] text-white hover:bg-[#C25D3E] rounded-full px-8" data-testid="continue-shopping-btn">
               Continue Shopping
+            </Button>
+          </Link>
+          <Link to={`/track-order`} className="block mt-3">
+            <Button variant="outline" className="border-[#2C241B] text-[#2C241B] hover:bg-[#2C241B] hover:text-[#FDFBF7] rounded-full px-8" data-testid="track-order-link">
+              Track Your Order
             </Button>
           </Link>
         </div>

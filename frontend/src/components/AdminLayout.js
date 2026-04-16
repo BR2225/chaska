@@ -36,7 +36,7 @@ export default function AdminLayout({ children }) {
         <div className="p-6 border-b border-[#E3DCD2]">
           <Link to="/" className="block">
             <h2 className="font-['Cormorant_Garamond'] text-2xl font-semibold text-[#2C241B]">
-              Dolce<span className="text-[#D96C4A]">Vita</span>
+              Chas<span className="text-[#D96C4A]">ka</span>
             </h2>
             <p className="text-xs text-[#5C5042] mt-0.5">Admin Panel</p>
           </Link>

@@ -15,6 +15,7 @@ import AdminDashboard from "@/pages/AdminDashboard";
 import AdminProducts from "@/pages/AdminProducts";
 import AdminOrders from "@/pages/AdminOrders";
 import AdminContacts from "@/pages/AdminContacts";
+import TrackOrder from "@/pages/TrackOrder";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/menu" element={<><Header /><Menu /><Footer /></>} />
             <Route path="/menu/:id" element={<><Header /><ProductDetail /><Footer /></>} />
             <Route path="/checkout" element={<><Header /><Checkout /><Footer /></>} />
+            <Route path="/track-order" element={<><Header /><TrackOrder /><Footer /></>} />
             <Route path="/contact" element={<><Header /><Contact /><Footer /></>} />
 
             {/* Admin Routes */}

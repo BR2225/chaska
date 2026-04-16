@@ -38,7 +38,7 @@ export default function AdminLogin() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="font-['Cormorant_Garamond'] text-4xl font-semibold text-[#2C241B]">
-            Dolce<span className="text-[#D96C4A]">Vita</span>
+            Chas<span className="text-[#D96C4A]">ka</span>
           </h1>
           <p className="text-sm text-[#5C5042] mt-2">Admin Dashboard</p>
         </div>

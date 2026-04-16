@@ -19,6 +19,7 @@ export default function Header() {
   const navLinks = [
     { to: "/", label: "Home" },
     { to: "/menu", label: "Menu" },
+    { to: "/track-order", label: "Track Order" },
     { to: "/contact", label: "Contact" },
   ];
 
@@ -27,7 +28,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-6 sm:px-8 flex items-center justify-between h-16 sm:h-20">
         <Link to="/" className="flex items-center gap-2" data-testid="logo-link">
           <span className="font-['Cormorant_Garamond'] text-2xl sm:text-3xl font-semibold text-[#2C241B] tracking-tight">
-            Dolce<span className="text-[#D96C4A]">Vita</span>
+            Chas<span className="text-[#D96C4A]">ka</span>
           </span>
         </Link>
 
