@@ -32,9 +32,8 @@ export default function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#FDFBF7]/80 backdrop-blur-xl border-b border-[#E3DCD2]/50" data-testid="main-header">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 flex items-center justify-between h-16 sm:h-20">
         <Link to="/" className="flex items-center gap-2.5" data-testid="logo-link">
-          <img src={LOGO_URL} alt="Chaska" className="h-10 sm:h-12 w-auto rounded-lg" />
-          <div className="hidden sm:block">
-            <span className="font-['Boogaloo'] text-2xl text-[#2C241B] tracking-wide block leading-none">
+          <div>
+            <span className="font-['Boogaloo'] text-2xl sm:text-3xl text-[#2C241B] tracking-wide block leading-none">
               CHASKA
             </span>
             <span className="text-[8px] uppercase tracking-[0.15em] text-[#5C5042] leading-none">
