@@ -34,7 +34,7 @@
 │   Middleware: CORS, Cookie Auth                                  │
 │   Security: bcrypt password hashing, JWT tokens                  │
 └───────────────────────────┬─────────────────────────────────────┘
-                            │ Motor (async driver)
+                            │ PyMongo Async
                             ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                    MongoDB Database                              │
@@ -55,13 +55,30 @@
 ### `users`
 ```json
 {
-  "email": "customer@example.com",    // unique index
-  "password_hash": "$2b$12...",       // bcrypt hashed
+  "email": "customer@example.com",    // optional, unique when present
+  "phone": "+919876543210",           // optional, unique when present
+  "password_hash": "$argon2id$...",   // Argon2id (legacy bcrypt upgrades on login)
   "name": "Customer Name",
   "role": "customer" | "admin",
+  "auth_version": 1,
+  "failed_login_count": 0,
   "created_at": "2026-04-16T..."
 }
 ```
+
+### `sessions`
+```json
+{
+  "id": "unguessable-session-id",
+  "user_id": "...",
+  "refresh_jti_hash": "sha256...",
+  "created_at": "...",
+  "last_used_at": "...",
+  "expires_at": "..."
+}
+```
+
+Expired sessions and authentication rate-limit buckets are removed using MongoDB TTL indexes.
 
 ### `products`
 ```json
@@ -136,13 +153,13 @@
   Customer/Admin                    Backend                     MongoDB
        │                              │                           │
        │─── POST /api/auth/register ──▶│                           │
-       │    {name, email, password}    │── bcrypt hash password ──▶│
+       │ {full_name, identifier, pass} │── Argon2id hash password ▶│
        │                              │◀── user created ──────────│
        │◀── Set httpOnly cookies ──────│                           │
        │    (access_token, refresh)    │                           │
        │                              │                           │
        │─── POST /api/auth/login ─────▶│                           │
-       │    {email, password}          │── verify bcrypt hash ────▶│
+       │    {identifier, password}     │── verify hash + throttle ▶│
        │                              │◀── user found ────────────│
        │◀── Set httpOnly cookies ──────│                           │
        │                              │                           │
@@ -155,10 +172,14 @@
 ```
 
 **Key Points:**
-- Passwords are hashed with bcrypt (never stored plain)
-- JWT access tokens expire in 1 hour, refresh tokens in 7 days
-- Tokens stored as httpOnly cookies (not accessible via JavaScript = XSS-safe)
-- Admin user is auto-seeded on server startup
+- Registration accepts a normalized email or international phone number
+- Passwords require 8+ characters with a letter and number, reject common values, and use Argon2id
+- Existing bcrypt passwords are upgraded to Argon2id after a successful login
+- JWT access tokens expire in 15 minutes; refresh tokens rotate and are backed by revocable MongoDB sessions
+- Tokens are stored in `httpOnly` cookies, with secure cookies enforced in production
+- Login/account throttling is shared through MongoDB rather than process-local memory
+- Admin user is created on startup only when `ADMIN_EMAIL` and `ADMIN_PASSWORD` are configured
+- Products and product prices are read exclusively from MongoDB; the one-time catalog migration populates a new database
 
 ---
 
@@ -217,37 +238,38 @@
 /app/
 ├── backend/
 │   ├── server.py              # All API routes, auth, models, seeding
-│   ├── .env                   # MONGO_URL, JWT_SECRET, ADMIN_EMAIL, ADMIN_PASSWORD, RAZORPAY keys
+│   ├── .env                   # MONGODB_URI, JWT_SECRET, ADMIN_EMAIL, ADMIN_PASSWORD, Razorpay keys
+│   ├── scripts/               # One-time MongoDB catalog migration
 │   └── requirements.txt       # Python dependencies
 │
 ├── frontend/
 │   ├── .env                   # REACT_APP_BACKEND_URL
 │   ├── src/
-│   │   ├── App.js             # Routes configuration
+│   │   ├── App.jsx            # Routes configuration
 │   │   ├── index.css           # Tailwind + custom CSS vars + fonts
 │   │   ├── contexts/
-│   │   │   ├── AuthContext.js  # User authentication state
-│   │   │   └── CartContext.js  # Shopping cart state (localStorage)
+│   │   │   ├── AuthContext.jsx # User authentication state
+│   │   │   └── CartContext.jsx # Shopping cart state (localStorage)
 │   │   ├── components/
-│   │   │   ├── Header.js       # Navigation + logo + cart + user menu
-│   │   │   ├── Footer.js       # Footer with contact info
-│   │   │   ├── AdminLayout.js  # Admin sidebar layout wrapper
-│   │   │   ├── ProductCard.js  # Product card with size selection
-│   │   │   └── CartSheet.js    # Slide-out cart panel
+│   │   │   ├── Header.jsx      # Navigation + logo + cart + user menu
+│   │   │   ├── Footer.jsx      # Footer with contact info
+│   │   │   ├── AdminLayout.jsx # Admin sidebar layout wrapper
+│   │   │   ├── ProductCard.jsx # Product card with size selection
+│   │   │   └── CartSheet.jsx   # Slide-out cart panel
 │   │   ├── pages/
-│   │   │   ├── Home.js         # Landing: hero, categories, featured, reviews
-│   │   │   ├── Menu.js         # Product catalog with filters
-│   │   │   ├── ProductDetail.js# Single product page
-│   │   │   ├── Checkout.js     # Order form + payment selection
-│   │   │   ├── TrackOrder.js   # Order tracking with status timeline
-│   │   │   ├── Contact.js      # Contact form + location info
-│   │   │   ├── CustomerAuth.js # Login/Register tabs
-│   │   │   ├── MyOrders.js     # Customer order history
-│   │   │   ├── AdminLogin.js   # Admin sign-in
-│   │   │   ├── AdminDashboard.js # Stats cards + recent orders
-│   │   │   ├── AdminProducts.js  # Product CRUD table + dialog
-│   │   │   ├── AdminOrders.js    # Order management + status updates
-│   │   │   └── AdminContacts.js  # Contact messages viewer
+│   │   │   ├── Home.jsx        # Landing: hero, categories, featured, reviews
+│   │   │   ├── Menu.jsx        # Product catalog with filters
+│   │   │   ├── ProductDetail.jsx # Single product page
+│   │   │   ├── Checkout.jsx    # Order form + payment selection
+│   │   │   ├── TrackOrder.jsx  # Order tracking with status timeline
+│   │   │   ├── Contact.jsx     # Contact form + location info
+│   │   │   ├── CustomerAuth.jsx # Login/Register tabs
+│   │   │   ├── MyOrders.jsx    # Customer order history
+│   │   │   ├── AdminLogin.jsx  # Admin sign-in
+│   │   │   ├── AdminDashboard.jsx # Stats cards + recent orders
+│   │   │   ├── AdminProducts.jsx # Product CRUD table + dialog
+│   │   │   ├── AdminOrders.jsx # Order management + status updates
+│   │   │   └── AdminContacts.jsx # Contact messages viewer
 │   │   └── components/ui/     # Shadcn UI components
 │   └── package.json
 │
@@ -291,14 +313,14 @@
 
 | Layer | Technology | Purpose |
 |-------|-----------|---------|
-| Frontend | React 19 | UI framework |
+| Frontend | React 19 + Vite 8 | UI framework and build tool |
 | Styling | Tailwind CSS 3.4 | Utility-first CSS |
 | UI Components | Shadcn UI | Dialogs, Selects, Sheets, Tables |
 | Routing | React Router 7 | Client-side navigation |
 | State | React Context | Auth + Cart state management |
 | Backend | FastAPI | Python async API server |
 | Database | MongoDB | NoSQL document store |
-| DB Driver | Motor 3.3 | Async MongoDB driver for Python |
+| DB Driver | PyMongo 4.17 | Native async MongoDB driver for Python |
 | Auth | JWT (PyJWT) + bcrypt | Token-based auth with password hashing |
 | Payment | Razorpay SDK | Online payment gateway (when configured) |
 | Fonts | Google Fonts | Boogaloo (brand), Cormorant Garamond (headings), Outfit (body) |
