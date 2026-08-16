@@ -1,8 +1,11 @@
 {
-  "name": "frontend",
+  "name": "chaska-storefront",
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
     "@radix-ui/react-accordion": "^1.2.8",

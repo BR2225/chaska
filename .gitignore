@@ -1,93 +1,30 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*credentials*.json
+*token*.json
 
-# IDE and editors
-.idea/
-.vscode/
-
-# Dependencies
+# Dependencies and builds
 node_modules/
-/node_modules
-/.pnp
-.pnp.js
-.yarn/install-state.gz
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# Testing
-/coverage
-
-# Next.js
-/.next/
-/out/
-next-env.d.ts
-*.tsbuildinfo
-
-# Production builds
-/build
+build/
 dist/
-dist
+coverage/
+.cache/
+.vercel/
 
-# Environment files (comprehensive coverage)
-
-*token.json*
-*credentials.json*
-
-# Logs and debug files
+# Package-manager logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
-dump.rdb
 
-# System files
+# Editors and operating systems
 .DS_Store
-*.pem
+.idea/
+.vscode/
 
-# Python
-__pycache__/
-*pyc*
-venv/
-.venv/
-.venv-*/
-
-# Development tools
-chainlit.md
-.chainlit
-.ipynb_checkpoints/
-.ac
-
-# Deployment
-.vercel
-
-# Data and databases
-agenthub/agents/youtube/db
-
-# Archive files and large assets
-**/*.zip
-**/*.tar.gz
-**/*.tar
-**/*.tgz
-*.pack
-*.deb
-*.dylib
-
-# Build caches
-.cache/
-
+# Local project notes containing credentials
 memory/test_credentials.md
-
-# Mobile development
-android-sdk/-e 
-# Environment and credential files
-.env
-.env.*
-!.env.example
-*.env
-credentials.json
-*.pem
-*.key
-.credentials
-memory

@@ -3,7 +3,7 @@
 ## Problem Statement
 Italian dessert (Bomboloni & Tiramisu) business website branded as **Chaska** â€” "Handmade Bliss on Your Way". Full e-commerce with ordering, admin panel, customer accounts, pay-on-delivery + Razorpay.
 
-## What's Been Implemented (April 2026)
+## What's Been Implemented (updated August 2026)
 - Custom logo with Boogaloo font branding + tagline
 - Product catalog (10 products) with category filtering & sizes
 - Shopping cart (localStorage) + Checkout with COD
@@ -12,8 +12,9 @@ Italian dessert (Bomboloni & Tiramisu) business website branded as **Chaska** â€
 - **Mock email notifications** logged on order creation
 - Contact form, customer reviews (5 seeded)
 - **Admin panel**: dashboard stats, product CRUD, order status management, contacts
-- JWT auth with admin seeding + customer registration
-- Razorpay integration code ready (needs API keys)
+- Argon2id customer/admin authentication with rotating HTTP-only cookie sessions
+- Server-authoritative MongoDB pricing and hardened Razorpay order/payment verification
+- Separate frontend and backend repositories for independent deployment
 
 ## Prioritized Backlog
 ### P1
