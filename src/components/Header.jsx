@@ -29,13 +29,19 @@ export default function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#FDFBF7]/80 backdrop-blur-xl border-b border-[#E3DCD2]/50" data-testid="main-header">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 flex items-center justify-between h-16 sm:h-20">
-        <Link to="/" className="flex items-center gap-2.5" data-testid="logo-link">
-          <img
-            src="/chaska-mark.png"
-            alt=""
-            aria-hidden="true"
-            className="h-9 sm:h-11 w-auto shrink-0 object-contain"
-          />
+        <Link to="/" className="chaska-logo-link flex items-center gap-2.5" data-testid="logo-link">
+          <span className="chaska-walker" aria-hidden="true">
+            <span className="chaska-walker__character">
+              <img
+                src="/chaska-mark.png"
+                alt=""
+                className="chaska-walker__mark"
+              />
+              <span className="chaska-walker__foot chaska-walker__foot--left" />
+              <span className="chaska-walker__foot chaska-walker__foot--right" />
+            </span>
+            <span className="chaska-walker__shadow" />
+          </span>
           <div>
             <span className="font-['Boogaloo'] text-2xl sm:text-3xl text-[#2C241B] tracking-wide block leading-none">
               CHASKA
