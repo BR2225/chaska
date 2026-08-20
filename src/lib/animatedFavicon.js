@@ -1,7 +1,33 @@
 const ICON_PATH = "/chaska-mark.png";
 const FRAME_SIZE = 64;
-const FRAME_COUNT = 24;
-const FRAME_INTERVAL_MS = 110;
+const FRAME_COUNT = 32;
+const FRAME_INTERVAL_MS = 100;
+
+function drawSparkle(context, pulse) {
+  if (pulse <= 0) return;
+
+  const x = 52;
+  const y = 12;
+  const outerRadius = 7 * pulse;
+  const innerRadius = 2.5 * pulse;
+
+  context.save();
+  context.translate(x, y);
+  context.rotate(Math.PI / 4);
+  context.beginPath();
+  for (let point = 0; point < 8; point += 1) {
+    const radius = point % 2 === 0 ? outerRadius : innerRadius;
+    const angle = (point / 8) * Math.PI * 2;
+    const pointX = Math.cos(angle) * radius;
+    const pointY = Math.sin(angle) * radius;
+    if (point === 0) context.moveTo(pointX, pointY);
+    else context.lineTo(pointX, pointY);
+  }
+  context.closePath();
+  context.fillStyle = "#D96C4A";
+  context.fill();
+  context.restore();
+}
 
 function createFrames(image) {
   const canvas = document.createElement("canvas");
@@ -11,14 +37,15 @@ function createFrames(image) {
   const context = canvas.getContext("2d");
   if (!context) return [];
 
-  const iconWidth = 58;
+  const iconWidth = 52;
   const iconHeight = iconWidth * (image.naturalHeight / image.naturalWidth);
 
   return Array.from({ length: FRAME_COUNT }, (_, index) => {
     const phase = (index / FRAME_COUNT) * Math.PI * 2;
-    const bounce = Math.sin(phase) * 2.5;
-    const rotation = Math.sin(phase) * 0.08;
-    const squash = 1 + Math.cos(phase) * 0.025;
+    const bounce = Math.sin(phase) * 6;
+    const rotation = Math.sin(phase) * 0.18;
+    const squash = 1 + Math.cos(phase) * 0.07;
+    const sparklePulse = Math.max(0, Math.sin(phase - Math.PI / 4));
 
     context.clearRect(0, 0, FRAME_SIZE, FRAME_SIZE);
     context.save();
@@ -33,6 +60,7 @@ function createFrames(image) {
       iconHeight,
     );
     context.restore();
+    drawSparkle(context, sparklePulse);
 
     return canvas.toDataURL("image/png");
   });
