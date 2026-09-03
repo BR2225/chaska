@@ -159,6 +159,14 @@ export default function CustomerAuth() {
             </Button>
           </form>
 
+          {isLogin && (
+            <p className="text-center text-xs text-[#5C5042] mt-4">
+              <Link to="/forgot-password" className="text-[#D96C4A] font-medium hover:underline" data-testid="auth-forgot-link">
+                Forgot your password?
+              </Link>
+            </p>
+          )}
+
           <p className="text-center text-xs text-[#5C5042] mt-4">
             {isLogin ? "Don't have an account? " : "Already have an account? "}
             <button onClick={() => setIsLogin(!isLogin)} className="text-[#D96C4A] font-medium hover:underline" data-testid="auth-toggle">
