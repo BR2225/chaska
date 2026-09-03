@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,6 +62,11 @@ export default function AdminLogin() {
               {loading ? "Signing in..." : "Sign In"}
             </Button>
           </div>
+          <p className="text-center text-xs text-[#5C5042] mt-4">
+            <Link to="/forgot-password" className="text-[#D96C4A] font-medium hover:underline" data-testid="admin-forgot-link">
+              Forgot your password?
+            </Link>
+          </p>
         </form>
       </div>
     </div>
