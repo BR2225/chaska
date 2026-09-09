@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+# Account and order pages: no public content, and most require a login.
+Disallow: /login
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /checkout
+Disallow: /my-orders
+Disallow: /track-order
+Disallow: /contact
+Disallow: /admin
+
+Sitemap: https://chaska.co.in/sitemap.xml
