@@ -8,7 +8,6 @@ Disallow: /reset-password
 Disallow: /checkout
 Disallow: /my-orders
 Disallow: /track-order
-Disallow: /contact
 Disallow: /admin
 
 Sitemap: https://chaska.co.in/sitemap.xml

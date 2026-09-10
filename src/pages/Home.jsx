@@ -59,6 +59,9 @@ export default function Home() {
             <h2 className="font-['Cormorant_Garamond'] text-3xl sm:text-4xl font-medium text-[#2C241B] tracking-tight">
               Crafted with Tradition
             </h2>
+            <p className="text-[#5C5042] max-w-2xl mx-auto mt-4 leading-relaxed">
+              Every bomboloni, tiramisu and Italian-inspired dessert is handmade fresh in our Patia kitchen in Bhubaneswar.
+            </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
             {/* Bomboloni Card */}
