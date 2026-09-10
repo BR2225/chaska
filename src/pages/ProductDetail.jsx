@@ -11,6 +11,8 @@ import { API_BASE_URL as API } from "@/config/api";
 export default function ProductDetail() {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const [status, setStatus] = useState("loading");
+  const [reloadKey, setReloadKey] = useState(0);
   const [selectedSize, setSelectedSize] = useState(null);
   const [added, setAdded] = useState(false);
   const { addItem } = useCart();
@@ -19,10 +21,25 @@ export default function ProductDetail() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Cancelled so a slow response for a previous id cannot overwrite a newer one.
+    let cancelled = false;
+    setStatus("loading");
+    setProduct(null);
+    setSelectedSize(null);
     http.get(`${API}/api/products/${id}`)
-      .then(r => { setProduct(r.data); setSelectedSize(r.data.sizes?.[0] || null); })
-      .catch(() => {});
-  }, [id]);
+      .then(r => {
+        if (cancelled) return;
+        setProduct(r.data);
+        setSelectedSize(r.data.sizes?.[0] || null);
+        setStatus("ready");
+      })
+      .catch(error => {
+        if (cancelled) return;
+        // A removed product is a dead end; anything else is worth retrying.
+        setStatus(error.response?.status === 404 ? "missing" : "error");
+      });
+    return () => { cancelled = true; };
+  }, [id, reloadKey]);
 
   const handleAdd = () => {
     if (!product) return;
@@ -40,15 +57,51 @@ export default function ProductDetail() {
     setTimeout(() => setAdded(false), 1500);
   };
 
-  if (!product) {
+  if (status === "loading") {
     return (
-      <div className="pt-28 pb-16 max-w-7xl mx-auto px-6 sm:px-8">
+      <div className="pt-28 pb-16 max-w-7xl mx-auto px-6 sm:px-8" role="status" aria-label="Loading dessert">
         <div className="animate-pulse grid grid-cols-1 md:grid-cols-2 gap-12">
           <div className="h-[400px] bg-[#F4F0E6] rounded-2xl" />
           <div className="space-y-4">
             <div className="h-4 w-20 bg-[#F4F0E6] rounded" />
             <div className="h-8 w-3/4 bg-[#F4F0E6] rounded" />
             <div className="h-20 bg-[#F4F0E6] rounded" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (status !== "ready" || !product) {
+    const missing = status === "missing";
+    return (
+      <div className="pt-28 pb-16 max-w-7xl mx-auto px-6 sm:px-8" data-testid="product-detail-unavailable">
+        <div className="max-w-md mx-auto text-center bg-white rounded-2xl border border-[#E3DCD2] p-10">
+          <h1 className="font-['Cormorant_Garamond'] text-3xl font-medium text-[#2C241B]">
+            {missing ? "This dessert is off the menu" : "We could not load this dessert"}
+          </h1>
+          <p className="text-sm text-[#5C5042] mt-3">
+            {missing
+              ? "It may have sold out or been taken down. The rest of the menu is still here."
+              : "Something went wrong reaching our kitchen. Please try again in a moment."}
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            {!missing && (
+              <Button
+                onClick={() => setReloadKey(key => key + 1)}
+                className="rounded-full px-6 bg-[#D96C4A] text-white hover:bg-[#C25D3E]"
+                data-testid="product-detail-retry"
+              >
+                Try again
+              </Button>
+            )}
+            <Link
+              to="/menu"
+              className="inline-flex items-center gap-2 text-sm text-[#5C5042] hover:text-[#D96C4A] transition-colors"
+              data-testid="product-detail-back-to-menu"
+            >
+              <ArrowLeft className="w-4 h-4" /> Back to Menu
+            </Link>
           </div>
         </div>
       </div>
