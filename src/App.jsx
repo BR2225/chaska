@@ -21,6 +21,8 @@ const AdminContacts = lazy(() => import("@/pages/AdminContacts"));
 const TrackOrder = lazy(() => import("@/pages/TrackOrder"));
 const CustomerAuth = lazy(() => import("@/pages/CustomerAuth"));
 const MyOrders = lazy(() => import("@/pages/MyOrders"));
+const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 
 function PageFallback() {
   return (
@@ -45,6 +47,8 @@ function App() {
               <Route path="/checkout" element={<CustomerRoute><Header /><Checkout /><Footer /></CustomerRoute>} />
               <Route path="/track-order" element={<><Header /><TrackOrder /><Footer /></>} />
               <Route path="/login" element={<><Header /><CustomerAuth /><Footer /></>} />
+              <Route path="/forgot-password" element={<><Header /><ForgotPassword /><Footer /></>} />
+              <Route path="/reset-password" element={<><Header /><ResetPassword /><Footer /></>} />
               <Route path="/my-orders" element={<CustomerRoute><Header /><MyOrders /><Footer /></CustomerRoute>} />
               <Route path="/contact" element={<CustomerRoute><Header /><Contact /><Footer /></CustomerRoute>} />
 
