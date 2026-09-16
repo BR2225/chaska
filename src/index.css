@@ -9,7 +9,7 @@ body {
     font-family: 'Outfit', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #FDFBF7;
+    background-color: #FDF0DB;
     color: #2C241B;
 }
 
@@ -24,7 +24,7 @@ code {
 
 @layer base {
     :root {
-        --background: 40 33% 98%;
+        --background: 37 89% 93%;
         --foreground: 30 24% 14%;
         --card: 0 0% 100%;
         --card-foreground: 30 24% 14%;

@@ -8,7 +8,7 @@ export default function CustomerRoute({ children }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#FDFBF7]" aria-label="Checking your account">
+      <div className="flex min-h-screen items-center justify-center bg-[#FDF0DB]" aria-label="Checking your account">
         <Loader2 className="h-6 w-6 animate-spin text-[#D96C4A]" aria-hidden="true" />
       </div>
     );

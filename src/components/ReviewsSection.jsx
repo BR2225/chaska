@@ -269,7 +269,7 @@ export default function ReviewsSection() {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-h-[92vh] max-w-lg overflow-y-auto rounded-3xl border-[#E3DCD2] bg-[#FDFBF7] p-0 shadow-2xl sm:rounded-3xl">
+        <DialogContent className="max-h-[92vh] max-w-lg overflow-y-auto rounded-3xl border-[#E3DCD2] bg-[#FDF0DB] p-0 shadow-2xl sm:rounded-3xl">
           {submitted ? (
             <div className="px-7 py-12 text-center sm:px-10">
               <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#88A45F]/15">

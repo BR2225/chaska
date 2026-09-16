@@ -27,12 +27,12 @@ export default function AdminLayout({ children }) {
   ];
 
   if (loading) {
-    return <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center text-[#5C5042]">Loading...</div>;
+    return <div className="min-h-screen bg-[#FDF0DB] flex items-center justify-center text-[#5C5042]">Loading...</div>;
   }
   if (!user || user.role !== "admin") return <Navigate to="/admin/login" replace />;
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] flex" data-testid="admin-layout">
+    <div className="min-h-screen bg-[#FDF0DB] flex" data-testid="admin-layout">
       {/* Sidebar */}
       <aside className="w-64 bg-[#F4F0E6] border-r border-[#E3DCD2] flex flex-col fixed h-full" data-testid="admin-sidebar">
         <div className="p-6 border-b border-[#E3DCD2]">
