@@ -21,6 +21,7 @@ export default function Menu() {
     { value: "all", label: "All Desserts" },
     { value: "bomboloni", label: "Bomboloni" },
     { value: "tiramisu", label: "Tiramisu" },
+    { value: "cakes", label: "Cakes" },
   ];
 
   return (
