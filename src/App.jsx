@@ -26,7 +26,7 @@ const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 
 function PageFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7] text-[#5C5042]" role="status">
+    <div className="min-h-screen flex items-center justify-center bg-[#FDF0DB] text-[#5C5042]" role="status">
       Loading Chaska…
     </div>
   );

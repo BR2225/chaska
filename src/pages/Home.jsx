@@ -43,7 +43,7 @@ export default function Home() {
               </Button>
             </Link>
             <Link to="/menu">
-              <Button variant="outline" className="bg-transparent text-[#FDFBF7] border-[#FDFBF7]/50 hover:bg-[#FDFBF7] hover:text-[#2C241B] transition-all duration-300 rounded-full px-8 py-3 text-base font-medium h-auto" data-testid="hero-menu-btn">
+              <Button variant="outline" className="bg-transparent text-[#FDFBF7] border-[#FDFBF7]/50 hover:bg-[#FDF0DB] hover:text-[#2C241B] transition-all duration-300 rounded-full px-8 py-3 text-base font-medium h-auto" data-testid="hero-menu-btn">
                 View Menu
               </Button>
             </Link>

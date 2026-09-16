@@ -27,7 +27,7 @@ export default function Header() {
   const handleLogout = async () => { await logout(); };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-[#FDFBF7]/80 backdrop-blur-xl border-b border-[#E3DCD2]/50" data-testid="main-header">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#FDF0DB]/80 backdrop-blur-xl border-b border-[#E3DCD2]/50" data-testid="main-header">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 flex items-center justify-between h-16 sm:h-20">
         <Link to="/" className="chaska-logo-link flex items-center gap-2.5" data-testid="logo-link">
           <span className="chaska-walker" aria-hidden="true">
@@ -87,7 +87,7 @@ export default function Header() {
                   </div>
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 bg-[#FDFBF7] border-[#E3DCD2]">
+              <DropdownMenuContent align="end" className="w-48 bg-[#FDF0DB] border-[#E3DCD2]">
                 <div className="px-3 py-2">
                   <p className="text-sm font-medium text-[#2C241B] truncate">{user.name}</p>
                   <p className="text-xs text-[#5C5042] truncate">{user.email || user.phone}</p>
@@ -126,7 +126,7 @@ export default function Header() {
                   )}
                 </button>
               </SheetTrigger>
-              <SheetContent className="w-full sm:max-w-md bg-[#FDFBF7] border-l border-[#E3DCD2]">
+              <SheetContent className="w-full sm:max-w-md bg-[#FDF0DB] border-l border-[#E3DCD2]">
                 <SheetHeader>
                   <SheetTitle className="font-['Cormorant_Garamond'] text-2xl text-[#2C241B]">Your Cart</SheetTitle>
                 </SheetHeader>
@@ -148,7 +148,7 @@ export default function Header() {
 
       {/* Mobile Nav */}
       {mobileOpen && (
-        <nav className="md:hidden bg-[#FDFBF7] border-b border-[#E3DCD2] px-6 py-4 space-y-3" data-testid="mobile-nav">
+        <nav className="md:hidden bg-[#FDF0DB] border-b border-[#E3DCD2] px-6 py-4 space-y-3" data-testid="mobile-nav">
           {navLinks.map(l => (
             <Link key={l.to} to={l.to} onClick={() => setMobileOpen(false)}
               className="block text-sm uppercase tracking-[0.15em] font-medium text-[#5C5042] hover:text-[#D96C4A]">

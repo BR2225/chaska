@@ -118,7 +118,7 @@ export default function AdminProducts() {
 
       {/* Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg bg-[#FDFBF7] border-[#E3DCD2] max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-lg bg-[#FDF0DB] border-[#E3DCD2] max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="font-['Cormorant_Garamond'] text-2xl text-[#2C241B]">
               {editing ? "Edit Product" : "New Product"}
