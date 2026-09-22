@@ -68,7 +68,11 @@ function ReviewCard({ review, duplicate = false }) {
           <p className="text-sm font-semibold text-white">{review.customer_name}</p>
           <p className="mt-0.5 flex items-center gap-1.5 text-xs text-[#FDFBF7]/50">
             <CheckCircle2 className="h-3.5 w-3.5 text-[#88A45F]" aria-hidden="true" />
-            {review.source === "sample" ? "Sample review" : "Community review"}
+            {review.source === "google"
+              ? "Google review"
+              : review.source === "sample"
+                ? "Sample review"
+                : "Community review"}
           </p>
         </div>
       </footer>
