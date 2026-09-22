@@ -13,6 +13,14 @@ function isAuthenticationRequest(url = "") {
   return /\/api\/auth\/(login|register|refresh|logout)(?:\?|$)/.test(url);
 }
 
+// Set alongside the httponly auth cookies and expiring with them, so the app can
+// tell a visitor who never signed in from one whose access token has lapsed.
+// Without it every anonymous page load fired a refresh that could only 401.
+export function hasStoredSession() {
+  if (typeof document === "undefined") return false;
+  return /(?:^|;\s*)chaska_session=1(?:;|$)/.test(document.cookie);
+}
+
 http.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -22,6 +30,7 @@ http.interceptors.response.use(
       || !request
       || request.__chaskaAuthRetry
       || isAuthenticationRequest(request.url)
+      || !hasStoredSession()
     ) {
       return Promise.reject(error);
     }

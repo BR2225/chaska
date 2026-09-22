@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import http from "@/lib/http";
+import http, { hasStoredSession } from "@/lib/http";
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
@@ -7,6 +7,13 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const checkAuth = useCallback(async () => {
+    // A visitor with no session cookie has nothing to restore, so asking the
+    // API would only ever return 401 on every page load.
+    if (!hasStoredSession()) {
+      setUser(false);
+      setLoading(false);
+      return;
+    }
     try {
       const { data } = await http.get("/api/auth/me");
       setUser(data);
