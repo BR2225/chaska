@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import { MapPin, Phone, Clock } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -44,15 +44,11 @@ export default function Footer() {
             <div className="space-y-3">
               <div className="flex items-start gap-2 text-sm text-[#E3DCD2]/80">
                 <MapPin className="w-4 h-4 mt-0.5 text-[#D96C4A]" strokeWidth={1.5} />
-                <span>42 Via Roma, Connaught Place, New Delhi</span>
+                <span>Infront of KFC, Chandaka Industrial Estate, Patia, Bhubaneswar, Odisha 751024</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-[#E3DCD2]/80">
                 <Phone className="w-4 h-4 text-[#D96C4A]" strokeWidth={1.5} />
-                <span>+91 98765 43210</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-[#E3DCD2]/80">
-                <Mail className="w-4 h-4 text-[#D96C4A]" strokeWidth={1.5} />
-                <span>hello@chaska.in</span>
+                <a href="tel:+916371845506" className="hover:text-[#D96C4A] transition-colors">+91 63718 45506</a>
               </div>
             </div>
           </div>
@@ -63,9 +59,8 @@ export default function Footer() {
             <div className="space-y-2 text-sm text-[#E3DCD2]/80">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-[#D96C4A]" strokeWidth={1.5} />
-                <span>Mon - Fri: 8AM - 10PM</span>
+                <span>Mon - Sun: 5:30PM - 8PM</span>
               </div>
-              <p className="pl-6">Sat - Sun: 9AM - 11PM</p>
             </div>
           </div>
         </div>

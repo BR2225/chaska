@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import http from "@/lib/http";
-import { MapPin, Phone, Mail, Clock, Send } from "lucide-react";
+import { MapPin, Phone, Clock, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -77,10 +77,9 @@ export default function Contact() {
 
             <div className="space-y-5">
               {[
-                { icon: MapPin, label: "Address", value: "42 Via Roma, Connaught Place, New Delhi 110001" },
-                { icon: Phone, label: "Phone", value: "+91 98765 43210" },
-                { icon: Mail, label: "Email", value: "hello@chaska.in" },
-                { icon: Clock, label: "Hours", value: "Mon-Fri 8AM-10PM | Sat-Sun 9AM-11PM" },
+                { icon: MapPin, label: "Address", value: "Infront of KFC, Chandaka Industrial Estate, Patia, Bhubaneswar, Odisha 751024" },
+                { icon: Phone, label: "Phone", value: "+91 63718 45506" },
+                { icon: Clock, label: "Hours", value: "Mon-Sun 5:30PM-8PM" },
               ].map(({ icon: Icon, label, value }) => (
                 <div key={label} className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-[#D96C4A]/10 flex items-center justify-center flex-shrink-0">
