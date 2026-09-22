@@ -29,7 +29,7 @@ export default function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#FDF0DB]/80 backdrop-blur-xl border-b border-[#E3DCD2]/50" data-testid="main-header">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 flex items-center justify-between h-16 sm:h-20">
-        <Link to="/" className="chaska-logo-link flex items-center gap-2.5" data-testid="logo-link">
+        <Link to="/" className="chaska-logo-link flex min-w-0 items-center gap-2.5" data-testid="logo-link">
           <span className="chaska-walker" aria-hidden="true">
             <span className="chaska-walker__character">
               <img
@@ -42,11 +42,14 @@ export default function Header() {
             </span>
             <span className="chaska-walker__shadow" />
           </span>
-          <div>
-            <span className="font-['Boogaloo'] text-2xl sm:text-3xl text-[#2C241B] tracking-wide block leading-none">
+          <div className="min-w-0">
+            <span className="font-['Boogaloo'] text-2xl sm:text-3xl text-[#2C241B] tracking-wide block leading-tight whitespace-nowrap">
               CHASKA
             </span>
-            <span className="text-[8px] uppercase tracking-[0.15em] text-[#5C5042] leading-none">
+            {/* Hidden on the narrowest screens: alongside the mark and the three
+                action icons there is no room for it on one line, and letting it
+                wrap made the lockup taller than the header and clipped CHASKA. */}
+            <span className="hidden sm:block text-[8px] uppercase tracking-[0.15em] text-[#5C5042] leading-none whitespace-nowrap">
               Handmade Bliss on Your Way
             </span>
           </div>
