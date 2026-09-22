@@ -68,7 +68,11 @@ function ReviewCard({ review, duplicate = false }) {
           <p className="text-sm font-semibold text-white">{review.customer_name}</p>
           <p className="mt-0.5 flex items-center gap-1.5 text-xs text-[#FDFBF7]/50">
             <CheckCircle2 className="h-3.5 w-3.5 text-[#88A45F]" aria-hidden="true" />
-            {review.source === "sample" ? "Sample review" : "Community review"}
+            {review.source === "google"
+              ? "Google review"
+              : review.source === "sample"
+                ? "Sample review"
+                : "Community review"}
           </p>
         </div>
       </footer>
@@ -218,6 +222,25 @@ export default function ReviewsSection() {
                 </p>
               </div>
             </div>
+            {/* Google rating shown as attributed content and linked to the listing.
+                It is deliberately not in the LocalBusiness JSON-LD: a business
+                marking up reviews of itself is self-serving and ineligible. */}
+            <a
+              href="https://maps.google.com/?cid=3277831621940547587"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-3 backdrop-blur-sm transition-colors hover:border-white/25"
+              data-testid="google-rating-badge"
+            >
+              <span className="font-['Cormorant_Garamond'] text-4xl font-semibold leading-none text-white">
+                4.9
+              </span>
+              <span className="h-9 w-px bg-white/15" aria-hidden="true" />
+              <div>
+                <RatingStars rating={5} />
+                <p className="mt-1 text-xs text-[#FDFBF7]/50">107 Google reviews</p>
+              </div>
+            </a>
             <Button
               type="button"
               onClick={openReviewForm}
