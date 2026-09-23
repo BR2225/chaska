@@ -19,10 +19,9 @@ export default function Menu() {
   }, [activeCategory]);
 
   const categories = [
-    { value: "all", label: "All Desserts" },
+    { value: "all", label: "All" },
     { value: "bomboloni", label: "Bomboloni" },
-    { value: "tiramisu", label: "Tiramisu" },
-    { value: "cakes", label: "Cakes" },
+    { value: "desserts", label: "Desserts" },
   ];
 
   return (
