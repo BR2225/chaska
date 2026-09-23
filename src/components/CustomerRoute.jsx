@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from "react-router-dom";
-import { Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import ChaskaLoader from "@/components/ChaskaLoader";
 
 export default function CustomerRoute({ children }) {
   const { user, loading } = useAuth();
@@ -8,9 +8,7 @@ export default function CustomerRoute({ children }) {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#FDF0DB]" aria-label="Checking your account">
-        <Loader2 className="h-6 w-6 animate-spin text-[#D96C4A]" aria-hidden="true" />
-      </div>
+      <ChaskaLoader label="Checking your account" />
     );
   }
 
