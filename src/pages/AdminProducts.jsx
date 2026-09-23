@@ -137,7 +137,7 @@ export default function AdminProducts() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="bomboloni">Bomboloni</SelectItem>
-                  <SelectItem value="tiramisu">Tiramisu</SelectItem>
+                  <SelectItem value="desserts">Desserts</SelectItem>
                 </SelectContent>
               </Select>
             </div>

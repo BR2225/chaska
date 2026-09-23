@@ -81,7 +81,7 @@ export default function Home() {
               </div>
             </Link>
             {/* Tiramisu Card */}
-            <Link to="/menu?category=tiramisu" className="group relative overflow-hidden rounded-2xl" data-testid="category-tiramisu">
+            <Link to="/menu?category=desserts" className="group relative overflow-hidden rounded-2xl" data-testid="category-tiramisu">
               <div className="aspect-[4/3] overflow-hidden">
                 <img
                   src="https://images.unsplash.com/photo-1714385905983-6f8e06fffae1?w=800"
