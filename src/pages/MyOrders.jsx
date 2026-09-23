@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Package, Clock, CheckCircle, Truck, XCircle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { API_BASE_URL as API } from "@/config/api";
+import ChaskaLoader from "@/components/ChaskaLoader";
 
 const statusConfig = {
   pending: { icon: Clock, color: "#E8A317", label: "Pending" },
@@ -41,15 +42,7 @@ export default function MyOrders() {
         </h1>
 
         {loading ? (
-          <div className="space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl border border-[#E3DCD2]/50 p-6 animate-pulse">
-                <div className="h-4 w-32 bg-[#F4F0E6] rounded mb-3" />
-                <div className="h-3 w-48 bg-[#F4F0E6] rounded mb-2" />
-                <div className="h-3 w-24 bg-[#F4F0E6] rounded" />
-              </div>
-            ))}
-          </div>
+          <ChaskaLoader label="Loading your orders" fullScreen={false} className="rounded-2xl" />
         ) : orders.length === 0 ? (
           <div className="text-center py-20" data-testid="no-orders">
             <Package className="w-16 h-16 text-[#E3DCD2] mx-auto mb-4" strokeWidth={1} />

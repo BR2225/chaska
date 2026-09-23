@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import http from "@/lib/http";
 import ProductCard from "@/components/ProductCard";
 import { API_BASE_URL as API } from "@/config/api";
+import ChaskaLoader from "@/components/ChaskaLoader";
 
 export default function Menu() {
   const [products, setProducts] = useState([]);
@@ -55,18 +56,7 @@ export default function Menu() {
       {/* Products Grid */}
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl border border-[#E3DCD2]/50 overflow-hidden animate-pulse">
-                <div className="h-[240px] bg-[#F4F0E6]" />
-                <div className="p-6 space-y-3">
-                  <div className="h-3 w-20 bg-[#F4F0E6] rounded" />
-                  <div className="h-5 w-3/4 bg-[#F4F0E6] rounded" />
-                  <div className="h-3 w-full bg-[#F4F0E6] rounded" />
-                </div>
-              </div>
-            ))}
-          </div>
+          <ChaskaLoader label="Loading the menu" fullScreen={false} className="rounded-2xl" />
         ) : products.length === 0 ? (
           <div className="text-center py-20">
             <p className="font-['Cormorant_Garamond'] text-2xl text-[#5C5042]">No products found</p>

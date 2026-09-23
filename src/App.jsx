@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AdminLayout from "@/components/AdminLayout";
 import CustomerRoute from "@/components/CustomerRoute";
+import ChaskaLoader from "@/components/ChaskaLoader";
 
 const Home = lazy(() => import("@/pages/Home"));
 const Menu = lazy(() => import("@/pages/Menu"));
@@ -25,11 +26,7 @@ const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 
 function PageFallback() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-[#FDF0DB] text-[#5C5042]" role="status">
-      Loading Chaska…
-    </div>
-  );
+  return <ChaskaLoader label="Loading Chaska" />;
 }
 
 function App() {

@@ -4,6 +4,7 @@ import http from "@/lib/http";
 import { useAuth } from "@/contexts/AuthContext";
 import { LayoutDashboard, Package, ShoppingCart, MessageSquare, LogOut } from "lucide-react";
 import { API_BASE_URL as API } from "@/config/api";
+import ChaskaLoader from "@/components/ChaskaLoader";
 
 export default function AdminLayout({ children }) {
   const { user, loading, logout } = useAuth();
@@ -27,7 +28,7 @@ export default function AdminLayout({ children }) {
   ];
 
   if (loading) {
-    return <div className="min-h-screen bg-[#FDF0DB] flex items-center justify-center text-[#5C5042]">Loading...</div>;
+    return <ChaskaLoader label="Loading the admin panel" />;
   }
   if (!user || user.role !== "admin") return <Navigate to="/admin/login" replace />;
 

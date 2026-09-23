@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { API_BASE_URL as API } from "@/config/api";
+import ChaskaLoader from "@/components/ChaskaLoader";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -59,16 +60,7 @@ export default function ProductDetail() {
 
   if (status === "loading") {
     return (
-      <div className="pt-28 pb-16 max-w-7xl mx-auto px-6 sm:px-8" role="status" aria-label="Loading dessert">
-        <div className="animate-pulse grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div className="h-[400px] bg-[#F4F0E6] rounded-2xl" />
-          <div className="space-y-4">
-            <div className="h-4 w-20 bg-[#F4F0E6] rounded" />
-            <div className="h-8 w-3/4 bg-[#F4F0E6] rounded" />
-            <div className="h-20 bg-[#F4F0E6] rounded" />
-          </div>
-        </div>
-      </div>
+      <ChaskaLoader label="Loading dessert" />
     );
   }
 
