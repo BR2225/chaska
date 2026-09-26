@@ -18,39 +18,47 @@ export default function Home() {
     <div data-testid="home-page">
       {/* Hero */}
       <section
-        className="relative min-h-[90vh] flex items-center justify-center overflow-hidden"
+        className="relative bg-[#FDF0DB] pt-16 sm:pt-20"
         data-testid="hero-section"
       >
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(/chaska-hero.jpg)` }}
-        />
-        {/* A cream scrim, not the dark one this hero used to carry: the artwork
-            behind it is light, so the text over it is dark and needs lifting
-            off the illustration rather than a wash that would muddy it. */}
-        <div className="absolute inset-0 bg-[#FDF0DB]/55" />
-        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
-          <p className="text-sm uppercase tracking-[0.3em] text-[#D96C4A] mb-4 opacity-0 animate-fade-in-up font-medium">
-            Authentic Italian Desserts
-          </p>
-          <h1 className="font-['Cormorant_Garamond'] text-5xl sm:text-6xl lg:text-7xl font-light text-[#2C241B] tracking-tighter leading-none mb-6 opacity-0 animate-fade-in-up animate-delay-100">
-            Bomboloni &<br />Tiramisu
-          </h1>
-          <p className="text-lg text-[#5C5042] max-w-xl mx-auto mb-8 opacity-0 animate-fade-in-up animate-delay-200 leading-relaxed">
-            Handcrafted with passion, using recipes from the heart of Italy. Every bite is a journey to Florence.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center opacity-0 animate-fade-in-up animate-delay-300">
-            <Link to="/menu">
-              <Button className="bg-[#D96C4A] text-white hover:bg-[#C25D3E] hover:shadow-lg transition-all duration-300 rounded-full px-8 py-3 text-base font-medium h-auto" data-testid="hero-order-btn">
-                Order Now <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
-            <Link to="/menu">
-              <Button variant="outline" className="bg-transparent text-[#2C241B] border-[#2C241B]/40 hover:bg-[#2C241B] hover:text-[#FDF0DB] transition-all duration-300 rounded-full px-8 py-3 text-base font-medium h-auto" data-testid="hero-menu-btn">
-                View Menu
-              </Button>
-            </Link>
-          </div>
+        {/* The illustration carries the shop's name, so the page keeps a heading
+            for search engines and screen readers without printing it twice. */}
+        <h1 className="sr-only">
+          CHASKA — handmade bomboloni, tiramisu and Italian-inspired desserts in Patia, Bhubaneswar
+        </h1>
+        {/* Shown whole rather than cropped to fill: the artwork is 2.39:1, so
+            covering a tall phone screen would leave a narrow strip of its middle.
+            Its edges are the same cream as this section, so it meets the page
+            without a seam at any width. */}
+        <picture>
+          {/* Narrow screens take a tighter crop of the same artwork. At full
+              width the 2.39:1 version stands about 163px tall on a phone, which
+              leaves the stall too small to read; this one stands about 273px. */}
+          <source
+            media="(max-width: 640px)"
+            srcSet="/chaska-hero-mobile.jpg"
+            width={1000}
+            height={700}
+          />
+          <img
+            src="/chaska-hero.jpg"
+            alt="A Chaska market stall, with a baker piping chocolate into freshly fried bomboloni"
+            width={1672}
+            height={700}
+            className="w-full h-auto"
+          />
+        </picture>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center px-6 pt-8 pb-16 sm:pb-20 opacity-0 animate-fade-in-up animate-delay-100">
+          <Link to="/menu">
+            <Button className="w-full sm:w-auto bg-[#D96C4A] text-white hover:bg-[#C25D3E] hover:shadow-lg transition-all duration-300 rounded-full px-8 py-3 text-base font-medium h-auto" data-testid="hero-order-btn">
+              Order Now <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </Link>
+          <Link to="/menu">
+            <Button variant="outline" className="w-full sm:w-auto bg-transparent text-[#2C241B] border-[#2C241B]/40 hover:bg-[#2C241B] hover:text-[#FDF0DB] transition-all duration-300 rounded-full px-8 py-3 text-base font-medium h-auto" data-testid="hero-menu-btn">
+              View Menu
+            </Button>
+          </Link>
         </div>
       </section>
 
