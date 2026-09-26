@@ -23,17 +23,20 @@ export default function Home() {
       >
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(https://images.unsplash.com/photo-1749996089724-268703b8c4dc?w=1400)` }}
+          style={{ backgroundImage: `url(/chaska-hero.jpg)` }}
         />
-        <div className="absolute inset-0 bg-[#2C241B]/45" />
+        {/* A cream scrim, not the dark one this hero used to carry: the artwork
+            behind it is light, so the text over it is dark and needs lifting
+            off the illustration rather than a wash that would muddy it. */}
+        <div className="absolute inset-0 bg-[#FDF0DB]/55" />
         <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
           <p className="text-sm uppercase tracking-[0.3em] text-[#D96C4A] mb-4 opacity-0 animate-fade-in-up font-medium">
             Authentic Italian Desserts
           </p>
-          <h1 className="font-['Cormorant_Garamond'] text-5xl sm:text-6xl lg:text-7xl font-light text-[#FDFBF7] tracking-tighter leading-none mb-6 opacity-0 animate-fade-in-up animate-delay-100">
+          <h1 className="font-['Cormorant_Garamond'] text-5xl sm:text-6xl lg:text-7xl font-light text-[#2C241B] tracking-tighter leading-none mb-6 opacity-0 animate-fade-in-up animate-delay-100">
             Bomboloni &<br />Tiramisu
           </h1>
-          <p className="text-lg text-[#FDFBF7]/80 max-w-xl mx-auto mb-8 opacity-0 animate-fade-in-up animate-delay-200 leading-relaxed">
+          <p className="text-lg text-[#5C5042] max-w-xl mx-auto mb-8 opacity-0 animate-fade-in-up animate-delay-200 leading-relaxed">
             Handcrafted with passion, using recipes from the heart of Italy. Every bite is a journey to Florence.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center opacity-0 animate-fade-in-up animate-delay-300">
@@ -43,7 +46,7 @@ export default function Home() {
               </Button>
             </Link>
             <Link to="/menu">
-              <Button variant="outline" className="bg-transparent text-[#FDFBF7] border-[#FDFBF7]/50 hover:bg-[#FDF0DB] hover:text-[#2C241B] transition-all duration-300 rounded-full px-8 py-3 text-base font-medium h-auto" data-testid="hero-menu-btn">
+              <Button variant="outline" className="bg-transparent text-[#2C241B] border-[#2C241B]/40 hover:bg-[#2C241B] hover:text-[#FDF0DB] transition-all duration-300 rounded-full px-8 py-3 text-base font-medium h-auto" data-testid="hero-menu-btn">
                 View Menu
               </Button>
             </Link>
