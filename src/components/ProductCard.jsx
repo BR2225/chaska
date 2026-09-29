@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Plus, Check } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -12,6 +12,25 @@ export default function ProductCard({ product }) {
   const navigate = useNavigate();
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || null);
   const [added, setAdded] = useState(false);
+
+  // Products carrying several shots cycle through them; the rest keep the one
+  // image they have always had.
+  const gallery = useMemo(() => {
+    const shots = (product.images?.length ? product.images : [product.image]).filter(Boolean);
+    return shots.length ? shots : [];
+  }, [product.images, product.image]);
+  const [shotIndex, setShotIndex] = useState(0);
+
+  useEffect(() => {
+    if (gallery.length < 2) return undefined;
+    // Honour a visitor who has asked the system to stop animations.
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return undefined;
+    const timer = window.setInterval(
+      () => setShotIndex(index => (index + 1) % gallery.length),
+      3500,
+    );
+    return () => window.clearInterval(timer);
+  }, [gallery.length]);
 
   const handleAdd = (e) => {
     e.preventDefault();
@@ -41,12 +60,21 @@ export default function ProductCard({ product }) {
   return (
     <Link to={`/menu/${product.id}`} className="group block" data-testid={`product-card-${product.id}`}>
       <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(44,36,27,0.06)] border border-[#E3DCD2]/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgb(44,36,27,0.1)] overflow-hidden">
-        <div className="relative overflow-hidden">
-          <img
-            src={product.image}
-            alt={product.name}
-            className="w-full h-[240px] object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+        <div className="relative h-[240px] overflow-hidden">
+          {/* Stacked and cross-faded rather than swapped, so the card never
+              shows a gap while the next shot decodes. */}
+          {gallery.map((shot, index) => (
+            <img
+              key={shot}
+              src={shot}
+              alt={index === 0 ? product.name : ""}
+              aria-hidden={index === 0 ? undefined : true}
+              loading={index === 0 ? undefined : "lazy"}
+              className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${
+                index === shotIndex ? "opacity-100" : "opacity-0"
+              }`}
+            />
+          ))}
           {product.featured && (
             <span className="absolute top-3 left-3 bg-[#D96C4A] text-white text-xs uppercase tracking-[0.15em] px-3 py-1 rounded-full font-medium">
               Featured
