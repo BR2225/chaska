@@ -65,6 +65,30 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Lazy so the map is fetched when a visitor scrolls to it rather than
+            competing with the menu for the first load. */}
+        <div className="mt-12">
+          <h4 className="text-sm uppercase tracking-[0.2em] text-[#D96C4A] mb-4 font-medium">Find Us</h4>
+          <div className="overflow-hidden rounded-2xl border border-[#FDFBF7]/10">
+            <iframe
+              title="Map showing Chaska in Patia, Bhubaneswar"
+              src="https://maps.google.com/maps?q=20.3537483,85.8174694&z=16&output=embed"
+              className="block w-full h-64 sm:h-80 border-0"
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+          <a
+            href="https://maps.google.com/?cid=3277831621940547587"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block mt-3 text-sm text-[#D96C4A] hover:underline"
+          >
+            Open in Google Maps
+          </a>
+        </div>
+
         <div className="border-t border-[#FDFBF7]/10 mt-12 pt-8 text-center">
           <p className="text-xs text-[#E3DCD2]/50 tracking-wider">
             &copy; {new Date().getFullYear()} Chaska. All rights reserved. Handmade bliss on your way.
