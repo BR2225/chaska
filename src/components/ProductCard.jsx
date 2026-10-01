@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
-import { Plus, Check } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Plus, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -13,24 +13,21 @@ export default function ProductCard({ product }) {
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || null);
   const [added, setAdded] = useState(false);
 
-  // Products carrying several shots cycle through them; the rest keep the one
-  // image they have always had.
+  // Products carrying several shots let the visitor step through them; the rest
+  // keep the one image they have always had.
   const gallery = useMemo(() => {
     const shots = (product.images?.length ? product.images : [product.image]).filter(Boolean);
     return shots.length ? shots : [];
   }, [product.images, product.image]);
   const [shotIndex, setShotIndex] = useState(0);
 
-  useEffect(() => {
-    if (gallery.length < 2) return undefined;
-    // Honour a visitor who has asked the system to stop animations.
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return undefined;
-    const timer = window.setInterval(
-      () => setShotIndex(index => (index + 1) % gallery.length),
-      3500,
-    );
-    return () => window.clearInterval(timer);
-  }, [gallery.length]);
+  // The whole card is a link to the product, so every control inside it has to
+  // stop the click before it navigates.
+  const showShot = (e, next) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShotIndex((next + gallery.length) % gallery.length);
+  };
 
   const handleAdd = (e) => {
     e.preventDefault();
@@ -79,6 +76,44 @@ export default function ProductCard({ product }) {
             <span className="absolute top-3 left-3 bg-[#D96C4A] text-white text-xs uppercase tracking-[0.15em] px-3 py-1 rounded-full font-medium">
               Featured
             </span>
+          )}
+
+          {gallery.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => showShot(e, shotIndex - 1)}
+                aria-label={`Previous photo of ${product.name}`}
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-[#FDF0DB]/85 text-[#2C241B] flex items-center justify-center shadow-sm transition-colors hover:bg-[#FDF0DB] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D96C4A]"
+                data-testid={`photo-prev-${product.id}`}
+              >
+                <ChevronLeft className="w-5 h-5" strokeWidth={1.75} />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => showShot(e, shotIndex + 1)}
+                aria-label={`Next photo of ${product.name}`}
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-[#FDF0DB]/85 text-[#2C241B] flex items-center justify-center shadow-sm transition-colors hover:bg-[#FDF0DB] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#D96C4A]"
+                data-testid={`photo-next-${product.id}`}
+              >
+                <ChevronRight className="w-5 h-5" strokeWidth={1.75} />
+              </button>
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                {gallery.map((shot, index) => (
+                  <button
+                    key={shot}
+                    type="button"
+                    onClick={(e) => showShot(e, index)}
+                    aria-label={`Show photo ${index + 1} of ${gallery.length}`}
+                    aria-current={index === shotIndex}
+                    className={`h-2 rounded-full transition-all ${
+                      index === shotIndex ? "w-5 bg-[#FDF0DB]" : "w-2 bg-[#FDF0DB]/60 hover:bg-[#FDF0DB]/90"
+                    }`}
+                    data-testid={`photo-dot-${product.id}-${index}`}
+                  />
+                ))}
+              </div>
+            </>
           )}
         </div>
         <div className="p-5 sm:p-6">
