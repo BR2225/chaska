@@ -67,9 +67,11 @@ export default function Contact() {
           <div className="lg:col-span-5 space-y-8">
             <div
               className="relative h-[250px] rounded-2xl overflow-hidden"
-              style={{ backgroundImage: `url(https://images.unsplash.com/photo-1774758951271-e0886de596f7?w=800)`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+              style={{ backgroundImage: `url(/store-visit.jpg)`, backgroundSize: 'cover', backgroundPosition: 'center' }}
             >
-              <div className="absolute inset-0 bg-[#2C241B]/40" />
+              {/* Darkened only where the caption sits: a flat wash over this one
+                  would grey out a photograph shot on a pale backdrop. */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#2C241B]/75 via-[#2C241B]/20 to-transparent" />
               <div className="relative z-10 flex items-end h-full p-6">
                 <h3 className="font-['Cormorant_Garamond'] text-3xl text-[#FDFBF7] font-medium">Visit Our Store</h3>
               </div>
