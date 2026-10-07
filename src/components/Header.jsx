@@ -22,6 +22,7 @@ export default function Header() {
     { to: "/menu", label: "Menu" },
     { to: "/my-orders", label: "Orders" },
     { to: "/contact", label: "Contact" },
+    { to: "/our-story", label: "Our Story" },
   ];
 
   const handleLogout = async () => { await logout(); };

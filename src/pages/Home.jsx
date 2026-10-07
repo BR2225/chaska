@@ -62,51 +62,45 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Categories */}
-      <section className="py-24 sm:py-32" data-testid="categories-section">
+      {/* Our Story */}
+      <section className="py-24 sm:py-32" data-testid="story-section">
         <div className="max-w-7xl mx-auto px-6 sm:px-8">
-          <div className="text-center mb-16">
-            <p className="text-sm uppercase tracking-[0.2em] text-[#D96C4A] mb-3 font-medium">Our Specialties</p>
-            <h2 className="font-['Cormorant_Garamond'] text-3xl sm:text-4xl font-medium text-[#2C241B] tracking-tight">
-              Crafted with Tradition
-            </h2>
-            <p className="text-[#5C5042] max-w-2xl mx-auto mt-4 leading-relaxed">
-              Every bomboloni, tiramisu and Italian-inspired dessert is handmade fresh in our Patia kitchen in Bhubaneswar.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-            {/* Bomboloni Card */}
-            <Link to="/menu?category=bomboloni" className="group relative overflow-hidden rounded-2xl" data-testid="category-bomboloni">
-              <div className="aspect-[4/3] overflow-hidden">
-                <img
-                  src="https://images.unsplash.com/photo-1608894109526-ea487bf2c02c?w=800"
-                  alt="Bomboloni"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+            <div>
+              <p className="text-sm uppercase tracking-[0.2em] text-[#D96C4A] mb-3 font-medium">Our Story</p>
+              <h2 className="font-['Cormorant_Garamond'] text-3xl sm:text-4xl lg:text-5xl font-medium text-[#2C241B] tracking-tight mb-6">
+                Everyone has a story.
+              </h2>
+              <div className="space-y-4 text-[#5C5042] leading-relaxed">
+                <p>
+                  Mine started with just{" "}
+                  <span className="font-semibold text-[#2C241B] bg-[#E9B949]/25 px-1.5 py-0.5 rounded">&#8377;700</span>.
+                  I put that little amount into an idea. I didn&apos;t know how it would become Chaska.
+                </p>
+                <p>
+                  With a lot of questions, mistakes and late nights, I kept trying — and the best
+                  part has always been you, the people who tasted Chaska and came back.
+                </p>
               </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-[#2C241B]/70 to-transparent flex items-end p-8">
-                <div>
-                  <h3 className="font-['Cormorant_Garamond'] text-3xl sm:text-4xl font-medium text-[#FDFBF7] mb-2">Bomboloni</h3>
-                  <p className="text-[#FDFBF7]/80 text-sm">Florentine filled doughnuts, pillowy and irresistible</p>
-                </div>
-              </div>
-            </Link>
-            {/* Tiramisu Card */}
-            <Link to="/menu?category=desserts" className="group relative overflow-hidden rounded-2xl" data-testid="category-tiramisu">
-              <div className="aspect-[4/3] overflow-hidden">
-                <img
-                  src="https://images.unsplash.com/photo-1714385905983-6f8e06fffae1?w=800"
-                  alt="Tiramisu"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-              </div>
-              <div className="absolute inset-0 bg-gradient-to-t from-[#2C241B]/70 to-transparent flex items-end p-8">
-                <div>
-                  <h3 className="font-['Cormorant_Garamond'] text-3xl sm:text-4xl font-medium text-[#FDFBF7] mb-2">Tiramisu</h3>
-                  <p className="text-[#FDFBF7]/80 text-sm">The quintessential Italian layered dessert</p>
-                </div>
-              </div>
-            </Link>
+              <p className="font-['Cormorant_Garamond'] text-2xl text-[#2C241B] mt-6">— Tony</p>
+              <Link
+                to="/our-story"
+                className="inline-flex items-center gap-2 mt-6 text-sm font-medium text-[#D96C4A] hover:text-[#C25D3E] transition-colors"
+                data-testid="read-our-story"
+              >
+                Read the whole story <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+            <div className="rounded-2xl overflow-hidden bg-[#F4EADB]">
+              <img
+                src="/our-story.jpg"
+                alt="Tony filling a fresh bombolone with chocolate at the Chaska cart"
+                width={953}
+                height={1000}
+                loading="lazy"
+                className="w-full h-auto"
+              />
+            </div>
           </div>
         </div>
       </section>

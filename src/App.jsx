@@ -24,6 +24,7 @@ const CustomerAuth = lazy(() => import("@/pages/CustomerAuth"));
 const MyOrders = lazy(() => import("@/pages/MyOrders"));
 const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
+const OurStory = lazy(() => import("@/pages/OurStory"));
 
 function PageFallback() {
   return <ChaskaLoader label="Loading Chaska" />;
@@ -43,6 +44,7 @@ function App() {
               <Route path="/menu/:id" element={<><Header /><ProductDetail /><Footer /></>} />
               <Route path="/checkout" element={<CustomerRoute><Header /><Checkout /><Footer /></CustomerRoute>} />
               <Route path="/track-order" element={<><Header /><TrackOrder /><Footer /></>} />
+              <Route path="/our-story" element={<><Header /><OurStory /><Footer /></>} />
               <Route path="/login" element={<><Header /><CustomerAuth /><Footer /></>} />
               <Route path="/forgot-password" element={<><Header /><ForgotPassword /><Footer /></>} />
               <Route path="/reset-password" element={<><Header /><ResetPassword /><Footer /></>} />
