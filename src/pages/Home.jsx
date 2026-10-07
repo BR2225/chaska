@@ -128,28 +128,6 @@ export default function Home() {
       )}
 
       <ReviewsSection />
-
-      {/* CTA */}
-      <section
-        className="relative py-24 sm:py-32 overflow-hidden"
-        style={{ backgroundImage: `url(https://images.unsplash.com/photo-1764943162758-5724d0cf409b?w=1400)`, backgroundSize: 'cover', backgroundPosition: 'center' }}
-        data-testid="cta-section"
-      >
-        <div className="absolute inset-0 bg-[#2C241B]/60 backdrop-blur-sm" />
-        <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
-          <h2 className="font-['Cormorant_Garamond'] text-3xl sm:text-4xl lg:text-5xl font-light text-[#FDFBF7] tracking-tight mb-6">
-            Ready to Taste Italy?
-          </h2>
-          <p className="text-[#FDFBF7]/80 mb-8 leading-relaxed">
-            Order online for delivery or visit our store for the freshest bomboloni and tiramisu in town.
-          </p>
-          <Link to="/menu">
-            <Button className="bg-[#D96C4A] text-white hover:bg-[#C25D3E] hover:shadow-lg transition-all duration-300 rounded-full px-10 py-3 text-base font-medium h-auto" data-testid="cta-order-btn">
-              Order Now
-            </Button>
-          </Link>
-        </div>
-      </section>
     </div>
   );
 }
