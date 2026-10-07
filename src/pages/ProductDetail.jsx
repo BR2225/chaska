@@ -111,7 +111,7 @@ export default function ProductDetail() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
           <div className="rounded-2xl overflow-hidden">
-            <img src={product.image} alt={product.name} className="w-full h-[350px] md:h-[450px] object-cover" />
+            <img src={product.image} alt={product.name} className="w-full h-[350px] md:h-[450px] object-contain bg-[#F4EADB]" />
           </div>
 
           <div className="flex flex-col justify-center">

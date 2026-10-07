@@ -57,7 +57,10 @@ export default function ProductCard({ product }) {
   return (
     <Link to={`/menu/${product.id}`} className="group block" data-testid={`product-card-${product.id}`}>
       <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(44,36,27,0.06)] border border-[#E3DCD2]/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgb(44,36,27,0.1)] overflow-hidden">
-        <div className="relative h-[240px] overflow-hidden">
+        {/* The warm ground stands in for whatever the photograph does not fill.
+            The shots are on cream and tan studio backdrops, so it reads as part
+            of the picture rather than as a letterbox. */}
+        <div className="relative h-[240px] overflow-hidden bg-[#F4EADB]">
           {/* Stacked and cross-faded rather than swapped, so the card never
               shows a gap while the next shot decodes. */}
           {gallery.map((shot, index) => (
@@ -67,7 +70,7 @@ export default function ProductCard({ product }) {
               alt={index === 0 ? product.name : ""}
               aria-hidden={index === 0 ? undefined : true}
               loading={index === 0 ? undefined : "lazy"}
-              className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${
+              className={`absolute inset-0 w-full h-full object-contain transition-all duration-700 group-hover:scale-105 ${
                 index === shotIndex ? "opacity-100" : "opacity-0"
               }`}
             />
