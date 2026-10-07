@@ -24,9 +24,16 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Install dependencies
         run: npm ci
-      - name: Lint and audit
-        run: |
-          npm run lint
-          npm audit --audit-level=low
+      - name: Lint
+        run: npm run lint
+      # Blocks on anything that reaches a browser. Tailwind's build chain carries
+      # advisories whose only fix is Tailwind 4, a rewrite of how the project is
+      # configured; none of it is served to anyone, so it should not gate a deploy.
+      - name: Audit runtime dependencies
+        run: npm audit --omit=dev --audit-level=low
+      # Reported so the build-time advisories stay visible without blocking.
+      - name: Audit build dependencies (advisory)
+        continue-on-error: true
+        run: npm audit --audit-level=low
       - name: Build
         run: npm run build
