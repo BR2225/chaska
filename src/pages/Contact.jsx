@@ -81,7 +81,7 @@ export default function Contact() {
               {[
                 { icon: MapPin, label: "Address", value: "Infront of KFC, Chandaka Industrial Estate, Patia, Bhubaneswar, Odisha 751024" },
                 { icon: Phone, label: "Phone", value: "+91 63718 45506" },
-                { icon: Clock, label: "Hours", value: "Mon-Sun 5:30PM-8PM" },
+                { icon: Clock, label: "Hours", value: "Mon-Sun 4:30PM-9PM" },
               ].map(({ icon: Icon, label, value }) => (
                 <div key={label} className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-[#D96C4A]/10 flex items-center justify-center flex-shrink-0">
