@@ -12,6 +12,26 @@ import { toast } from "sonner";
 import { API_BASE_URL as API } from "@/config/api";
 import { loadRazorpayCheckout } from "@/lib/razorpay";
 
+// Phone autofill on a handset supplies the number however it is stored in
+// Contacts: "+91 98765 43210", "098765 43210", with hyphens or NBSPs. The API
+// takes ten bare digits, so reduce whatever arrives to that.
+function normalizePhone(value) {
+  const digits = String(value ?? "").replace(/\D/g, "");
+  return digits.length > 10 ? digits.slice(-10) : digits;
+}
+
+// FastAPI reports validation failures as a list of error objects. Handing that
+// straight to the toast shows the customer nothing they can act on.
+function describeError(err) {
+  const detail = err.response?.data?.detail;
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    const field = detail[0]?.loc?.filter(part => part !== "body").join(" ");
+    return field ? `Please check the ${field.replace(/_/g, " ")} you entered.` : null;
+  }
+  return null;
+}
+
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
   const { user } = useAuth();
@@ -35,7 +55,7 @@ export default function Checkout() {
         ...prev,
         customer_name: prev.customer_name || user.name || "",
         customer_email: prev.customer_email || user.email || "",
-        customer_phone: prev.customer_phone || user.phone?.replace(/^\+91/, "") || "",
+        customer_phone: prev.customer_phone || normalizePhone(user.phone) || "",
       }));
     }
   }, [user]);
@@ -75,7 +95,7 @@ export default function Checkout() {
         setForm({
           customer_name: data.customer_name || "",
           customer_email: data.customer_email || "",
-          customer_phone: data.customer_phone || "",
+          customer_phone: normalizePhone(data.customer_phone),
           delivery_address: data.delivery_address || "",
           notes: data.notes || "",
         });
@@ -99,13 +119,20 @@ export default function Checkout() {
     : items;
   const checkoutTotal = retryOrder?.total ?? total;
 
-  const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: name === "customer_phone" ? normalizePhone(value) : value }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!retryOrder && items.length === 0) { toast.error("Your cart is empty"); return; }
     if (!form.customer_name || !form.customer_phone || !form.delivery_address) {
       toast.error("Please fill in all required fields");
+      return;
+    }
+    if (!/^[6-9]\d{9}$/.test(form.customer_phone)) {
+      toast.error("Enter a 10-digit Indian mobile number, without +91.");
       return;
     }
     setLoading(true);
@@ -155,7 +182,7 @@ export default function Checkout() {
           prefill: {
             name: form.customer_name,
             email: form.customer_email,
-            contact: `+91${form.customer_phone.replace(/^\+91/, "")}`,
+            contact: `+91${form.customer_phone}`,
           },
           theme: { color: "#D96C4A" },
           retry: { enabled: true },
@@ -218,7 +245,7 @@ export default function Checkout() {
       } else if (err.response?.status === 403) {
         toast.error("A customer account is required to place orders.");
       } else {
-        toast.error(err.response?.data?.detail || "Failed to place order. Please try again.");
+        toast.error(describeError(err) || "Failed to place order. Please try again.");
       }
     } finally {
       if (!checkoutOpened) setLoading(false);
@@ -313,7 +340,7 @@ export default function Checkout() {
                       </div>
                       <div>
                         <Label htmlFor="customer_phone" className="text-sm font-medium text-[#2C241B]">Phone *</Label>
-                        <Input name="customer_phone" type="tel" value={form.customer_phone} onChange={handleChange} readOnly={Boolean(retryOrder)} required className="mt-1 border-[#E3DCD2] focus:ring-[#D96C4A]" data-testid="input-phone" />
+                        <Input name="customer_phone" type="tel" inputMode="numeric" autoComplete="tel" maxLength={10} placeholder="10-digit mobile" value={form.customer_phone} onChange={handleChange} readOnly={Boolean(retryOrder)} required className="mt-1 border-[#E3DCD2] focus:ring-[#D96C4A]" data-testid="input-phone" />
                       </div>
                     </div>
                     <div>
