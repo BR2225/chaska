@@ -10,8 +10,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { API_BASE_URL as API } from "@/config/api";
+import VegMark from "@/components/VegMark";
 
-const emptyProduct = { name: "", category: "bomboloni", description: "", price: 0, image: "", sizes: [], is_available: true, featured: false };
+const emptyProduct = { name: "", category: "bomboloni", description: "", price: 0, image: "", images: [], sizes: [], is_available: true, featured: false };
+
+// The API replaces the whole product on save, so every field has to be sent or
+// it is wiped. `images` in particular holds the storefront's photo gallery.
+const toProductPayload = (p) => ({ name: p.name, category: p.category, description: p.description, price: p.price, image: p.image, images: p.images || [], sizes: p.sizes || [], is_available: p.is_available, featured: p.featured });
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
@@ -19,12 +24,13 @@ export default function AdminProducts() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(emptyProduct);
   const [sizeInput, setSizeInput] = useState({ name: "", price: "" });
+  const [updatingId, setUpdatingId] = useState(null);
 
   const load = () => http.get(`${API}/api/products`).then(r => setProducts(r.data));
   useEffect(() => { load(); }, []);
 
   const openNew = () => { setEditing(null); setForm(emptyProduct); setDialogOpen(true); };
-  const openEdit = (p) => { setEditing(p.id); setForm({ name: p.name, category: p.category, description: p.description, price: p.price, image: p.image, sizes: p.sizes || [], is_available: p.is_available, featured: p.featured }); setDialogOpen(true); };
+  const openEdit = (p) => { setEditing(p.id); setForm(toProductPayload(p)); setDialogOpen(true); };
 
   const addSize = () => {
     if (!sizeInput.name || !sizeInput.price) return;
@@ -34,18 +40,34 @@ export default function AdminProducts() {
   const removeSize = (idx) => setForm(prev => ({ ...prev, sizes: prev.sizes.filter((_, i) => i !== idx) }));
 
   const handleSave = async () => {
+    // The storefront shows the gallery ahead of `image`, so a new main photo has
+    // to lead the gallery as well or the change would not appear on the menu.
+    const payload = { ...form, images: form.images.length && form.image ? [form.image, ...form.images.slice(1)] : form.images };
     try {
       if (editing) {
-        await http.put(`${API}/api/products/${editing}`, form);
+        await http.put(`${API}/api/products/${editing}`, payload);
         toast.success("Product updated");
       } else {
-        await http.post(`${API}/api/products`, form);
+        await http.post(`${API}/api/products`, payload);
         toast.success("Product created");
       }
       setDialogOpen(false);
       load();
     } catch {
       toast.error("Failed to save product");
+    }
+  };
+
+  const setAvailability = async (p, isAvailable) => {
+    setUpdatingId(p.id);
+    try {
+      await http.put(`${API}/api/products/${p.id}`, { ...toProductPayload(p), is_available: isAvailable });
+      toast.success(`${p.name} marked ${isAvailable ? "available" : "out of stock"}`);
+      await load();
+    } catch {
+      toast.error("Failed to update stock status");
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -88,7 +110,7 @@ export default function AdminProducts() {
                   <div className="flex items-center gap-3">
                     <img src={p.image} alt={p.name} className="w-10 h-10 rounded-lg object-cover" />
                     <div>
-                      <p className="font-medium text-[#2C241B]">{p.name}</p>
+                      <p className="flex items-center gap-2 font-medium text-[#2C241B]"><VegMark />{p.name}</p>
                       {p.featured && <span className="text-xs text-[#D96C4A]">Featured</span>}
                     </div>
                   </div>
@@ -96,9 +118,15 @@ export default function AdminProducts() {
                 <td className="px-5 py-3 text-[#5C5042] capitalize">{p.category}</td>
                 <td className="px-5 py-3 text-[#2C241B] font-medium">₹{p.price}</td>
                 <td className="px-5 py-3">
-                  <span className={`text-xs px-2.5 py-0.5 rounded-full ${p.is_available ? "bg-[#4A7c59]/10 text-[#4A7c59]" : "bg-[#D3494E]/10 text-[#D3494E]"}`}>
-                    {p.is_available ? "Available" : "Unavailable"}
-                  </span>
+                  <Select value={p.is_available ? "available" : "out_of_stock"} onValueChange={v => setAvailability(p, v === "available")} disabled={updatingId === p.id}>
+                    <SelectTrigger className={`w-[140px] h-8 text-xs rounded-full border-transparent ${p.is_available ? "bg-[#4A7c59]/10 text-[#4A7c59]" : "bg-[#D3494E]/10 text-[#D3494E]"}`} data-testid={`product-status-select-${p.id}`}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="available">Available</SelectItem>
+                      <SelectItem value="out_of_stock">Out of Stock</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </td>
                 <td className="px-5 py-3 text-right">
                   <div className="flex items-center justify-end gap-2">

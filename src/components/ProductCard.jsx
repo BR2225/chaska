@@ -4,6 +4,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import VegMark from "@/components/VegMark";
 
 export default function ProductCard({ product }) {
   const { addItem } = useCart();
@@ -12,6 +13,7 @@ export default function ProductCard({ product }) {
   const navigate = useNavigate();
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || null);
   const [added, setAdded] = useState(false);
+  const outOfStock = !product.is_available;
 
   // Products carrying several shots let the visitor step through them; the rest
   // keep the one image they have always had.
@@ -32,6 +34,7 @@ export default function ProductCard({ product }) {
   const handleAdd = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    if (outOfStock) return;
     if (authLoading) {
       toast.info("Checking your account. Please try again in a moment.");
       return;
@@ -72,12 +75,17 @@ export default function ProductCard({ product }) {
               loading={index === 0 ? undefined : "lazy"}
               className={`absolute inset-0 w-full h-full object-contain transition-all duration-700 group-hover:scale-105 ${
                 index === shotIndex ? "opacity-100" : "opacity-0"
-              }`}
+              } ${outOfStock ? "grayscale" : ""}`}
             />
           ))}
           {product.featured && (
             <span className="absolute top-3 left-3 bg-[#D96C4A] text-white text-xs uppercase tracking-[0.15em] px-3 py-1 rounded-full font-medium">
               Featured
+            </span>
+          )}
+          {outOfStock && (
+            <span className="absolute top-3 right-3 bg-[#2C241B] text-white text-xs uppercase tracking-[0.15em] px-3 py-1 rounded-full font-medium" data-testid={`out-of-stock-${product.id}`}>
+              Out of Stock
             </span>
           )}
 
@@ -121,8 +129,9 @@ export default function ProductCard({ product }) {
         </div>
         <div className="p-5 sm:p-6">
           <p className="text-xs uppercase tracking-[0.2em] text-[#8A9A5B] font-medium mb-1">{product.category}</p>
-          <h3 className="font-['Cormorant_Garamond'] text-xl sm:text-2xl font-semibold text-[#2C241B] mb-2 group-hover:text-[#D96C4A] transition-colors">
-            {product.name}
+          <h3 className="flex items-start gap-2 font-['Cormorant_Garamond'] text-xl sm:text-2xl font-semibold text-[#2C241B] mb-2 group-hover:text-[#D96C4A] transition-colors">
+            <VegMark className="mt-1.5" />
+            <span>{product.name}</span>
           </h3>
           <p className="text-sm text-[#5C5042] leading-relaxed mb-4 line-clamp-2">{product.description}</p>
 
@@ -151,15 +160,17 @@ export default function ProductCard({ product }) {
             </span>
             <button
               onClick={handleAdd}
-              disabled={added}
+              disabled={added || outOfStock}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
-                added
+                outOfStock
+                  ? "bg-[#E3DCD2] text-[#5C5042] cursor-not-allowed"
+                  : added
                   ? "bg-[#4A7c59] text-white"
                   : "bg-[#D96C4A] text-white hover:bg-[#C25D3E] hover:shadow-lg"
               }`}
               data-testid={`add-to-cart-${product.id}`}
             >
-              {added ? <><Check className="w-4 h-4" /> Added</> : <><Plus className="w-4 h-4" /> Add</>}
+              {outOfStock ? "Out of Stock" : added ? <><Check className="w-4 h-4" /> Added</> : <><Plus className="w-4 h-4" /> Add</>}
             </button>
           </div>
         </div>
