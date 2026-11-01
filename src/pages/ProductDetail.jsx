@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { API_BASE_URL as API } from "@/config/api";
 import ChaskaLoader from "@/components/ChaskaLoader";
+import VegMark from "@/components/VegMark";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -43,7 +44,7 @@ export default function ProductDetail() {
   }, [id, reloadKey]);
 
   const handleAdd = () => {
-    if (!product) return;
+    if (!product || !product.is_available) return;
     if (authLoading) {
       toast.info("Checking your account. Please try again in a moment.");
       return;
@@ -101,6 +102,7 @@ export default function ProductDetail() {
   }
 
   const displayPrice = selectedSize ? selectedSize.price : product.price;
+  const outOfStock = !product.is_available;
 
   return (
     <div className="pt-24 sm:pt-28 pb-16" data-testid="product-detail-page">
@@ -110,14 +112,20 @@ export default function ProductDetail() {
         </Link>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
-          <div className="rounded-2xl overflow-hidden">
-            <img src={product.image} alt={product.name} className="w-full h-[350px] md:h-[450px] object-contain bg-[#F4EADB]" />
+          <div className="relative rounded-2xl overflow-hidden">
+            <img src={product.image} alt={product.name} className={`w-full h-[350px] md:h-[450px] object-contain bg-[#F4EADB] ${outOfStock ? "grayscale" : ""}`} />
+            {outOfStock && (
+              <span className="absolute top-4 right-4 bg-[#2C241B] text-white text-xs uppercase tracking-[0.15em] px-3 py-1 rounded-full font-medium" data-testid="detail-out-of-stock">
+                Out of Stock
+              </span>
+            )}
           </div>
 
           <div className="flex flex-col justify-center">
             <p className="text-sm uppercase tracking-[0.2em] text-[#8A9A5B] font-medium mb-2">{product.category}</p>
-            <h1 className="font-['Cormorant_Garamond'] text-4xl sm:text-5xl font-medium text-[#2C241B] tracking-tighter mb-4">
-              {product.name}
+            <h1 className="flex items-start gap-3 font-['Cormorant_Garamond'] text-4xl sm:text-5xl font-medium text-[#2C241B] tracking-tighter mb-4">
+              <VegMark className="mt-3 sm:mt-4" />
+              <span>{product.name}</span>
             </h1>
             <p className="text-[#5C5042] leading-relaxed mb-6">{product.description}</p>
 
@@ -147,13 +155,13 @@ export default function ProductDetail() {
               <span className="font-['Cormorant_Garamond'] text-4xl font-semibold text-[#2C241B]">&#8377;{displayPrice}</span>
               <Button
                 onClick={handleAdd}
-                disabled={added}
+                disabled={added || outOfStock}
                 className={`rounded-full px-8 py-3 h-auto text-base font-medium transition-all duration-300 ${
-                  added ? "bg-[#4A7c59] text-white" : "bg-[#D96C4A] text-white hover:bg-[#C25D3E] hover:shadow-lg"
+                  outOfStock ? "bg-[#E3DCD2] text-[#5C5042]" : added ? "bg-[#4A7c59] text-white" : "bg-[#D96C4A] text-white hover:bg-[#C25D3E] hover:shadow-lg"
                 }`}
                 data-testid="detail-add-to-cart"
               >
-                {added ? <><Check className="w-4 h-4 mr-2" /> Added to Cart</> : <><Plus className="w-4 h-4 mr-2" /> Add to Cart</>}
+                {outOfStock ? "Out of Stock" : added ? <><Check className="w-4 h-4 mr-2" /> Added to Cart</> : <><Plus className="w-4 h-4 mr-2" /> Add to Cart</>}
               </Button>
             </div>
 
