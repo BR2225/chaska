@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
 import http from "@/lib/http";
-import { Mail, MailOpen } from "lucide-react";
+import { Mail, MailOpen, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { API_BASE_URL as API } from "@/config/api";
 
 export default function AdminContacts() {
   const [contacts, setContacts] = useState([]);
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [draft, setDraft] = useState("");
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     http.get(`${API}/api/admin/contacts`).then(r => setContacts(r.data)).catch(() => {});
@@ -18,6 +22,23 @@ export default function AdminContacts() {
       setContacts(current => current.map(contact => contact.id === contactId ? { ...contact, read: true } : contact));
     } catch {
       toast.error("Could not mark this message as read");
+    }
+  };
+
+  const openReply = (contactId) => { setReplyingTo(contactId); setDraft(""); };
+
+  const sendReply = async (contact) => {
+    setSending(true);
+    try {
+      const { data } = await http.post(`${API}/api/admin/contacts/${contact.id}/reply`, { message: draft });
+      setContacts(current => current.map(c => c.id === contact.id ? { ...c, read: true, replies: [...(c.replies || []), data.reply] } : c));
+      setReplyingTo(null);
+      toast.success(`Reply sent to ${contact.email}`);
+    } catch (error) {
+      const detail = error.response?.data?.detail;
+      toast.error(typeof detail === "string" ? detail : "Failed to send reply");
+    } finally {
+      setSending(false);
     }
   };
 
@@ -42,11 +63,46 @@ export default function AdminContacts() {
                 </div>
                 <p className="text-xs text-[#5C5042] mb-1">{c.email}</p>
                 {c.subject && <p className="text-sm font-medium text-[#2C241B] mb-1">{c.subject}</p>}
-                <p className="text-sm text-[#5C5042] leading-relaxed">{c.message}</p>
-                {!c.read && (
-                  <Button variant="ghost" size="sm" onClick={() => markRead(c.id)} className="mt-2 px-0 text-[#D96C4A] hover:text-[#C25D3E]" data-testid={`mark-read-${c.id}`}>
-                    Mark as read
-                  </Button>
+                <p className="text-sm text-[#5C5042] leading-relaxed whitespace-pre-wrap">{c.message}</p>
+
+                {c.replies?.map((reply, idx) => (
+                  <div key={idx} className="mt-3 bg-[#F4F0E6] rounded-lg p-3" data-testid={`contact-reply-${c.id}-${idx}`}>
+                    <p className="text-xs text-[#5C5042] mb-1">You replied{reply.sent_at && ` on ${new Date(reply.sent_at).toLocaleString()}`}</p>
+                    <p className="text-sm text-[#2C241B] leading-relaxed whitespace-pre-wrap">{reply.message}</p>
+                  </div>
+                ))}
+
+                {replyingTo === c.id ? (
+                  <div className="mt-3">
+                    <Textarea
+                      value={draft}
+                      onChange={e => setDraft(e.target.value)}
+                      rows={4}
+                      maxLength={5000}
+                      placeholder={`Write your reply to ${c.email}`}
+                      className="border-[#E3DCD2]"
+                      data-testid={`reply-input-${c.id}`}
+                    />
+                    <div className="flex items-center gap-2 mt-2">
+                      <Button size="sm" onClick={() => sendReply(c)} disabled={sending || !draft.trim()} className="bg-[#D96C4A] text-white hover:bg-[#C25D3E] rounded-lg" data-testid={`send-reply-${c.id}`}>
+                        <Send className="w-3.5 h-3.5 mr-2" /> {sending ? "Sending..." : "Send Reply"}
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => setReplyingTo(null)} disabled={sending} className="text-[#5C5042]" data-testid={`cancel-reply-${c.id}`}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-4 mt-2">
+                    <Button variant="ghost" size="sm" onClick={() => openReply(c.id)} className="px-0 text-[#D96C4A] hover:text-[#C25D3E]" data-testid={`reply-${c.id}`}>
+                      Reply
+                    </Button>
+                    {!c.read && (
+                      <Button variant="ghost" size="sm" onClick={() => markRead(c.id)} className="px-0 text-[#D96C4A] hover:text-[#C25D3E]" data-testid={`mark-read-${c.id}`}>
+                        Mark as read
+                      </Button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
