@@ -50,31 +50,8 @@ export function AuthProvider({ children }) {
     return data;
   };
 
-  // Registering takes two steps now: the details earn a code, the code makes
-  // the account. Nothing is stored as a user until the address or the number
-  // has actually been proved.
-  const startRegistration = async (fullName, identifier, password) => {
-    const { data } = await http.post("/api/auth/register/start", {
-      full_name: fullName, identifier, password,
-    });
-    return data;
-  };
-
-  const completeRegistration = async (identifier, code) => {
-    const { data } = await http.post("/api/auth/register/verify", { identifier, code });
-    rememberSession();
-    setUser(data);
-    return data;
-  };
-
-  // Signing in afterwards takes either the password or a fresh code.
-  const requestLoginOtp = async (identifier) => {
-    const { data } = await http.post("/api/auth/otp/request", { identifier });
-    return data;
-  };
-
-  const loginWithOtp = async (identifier, code) => {
-    const { data } = await http.post("/api/auth/otp/verify", { identifier, code });
+  const register = async (fullName, identifier, password) => {
+    const { data } = await http.post("/api/auth/register", { full_name: fullName, identifier, password });
     rememberSession();
     setUser(data);
     return data;
@@ -90,10 +67,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{
-      user, loading, login, logout,
-      startRegistration, completeRegistration, requestLoginOtp, loginWithOtp,
-    }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
