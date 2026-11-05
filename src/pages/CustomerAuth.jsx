@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import http from "@/lib/http";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,11 +30,25 @@ export default function CustomerAuth() {
   const [codeFlow, setCodeFlow] = useState("register");
   const [channel, setChannel] = useState("email");
   const [code, setCode] = useState("");
+  // Which ways of signing up actually work today. Null until we know, so the
+  // form never rules a channel out on the strength of a guess.
+  const [channels, setChannels] = useState(null);
   const {
     login, startRegistration, completeRegistration, requestLoginOtp, loginWithOtp,
   } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    let active = true;
+    http.get("/api/auth/channels")
+      .then(({ data }) => { if (active) setChannels(data); })
+      .catch(() => { /* the form still works; the server says if it cannot send */ });
+    return () => { active = false; };
+  }, []);
+
+  const emailOnly = channels !== null && channels.email && !channels.phone;
+  const phoneOnly = channels !== null && channels.phone && !channels.email;
 
   const requestedLocation = location.state?.from;
   const authReason = location.state?.reason;
@@ -256,10 +271,27 @@ export default function CustomerAuth() {
                 )}
                 <div>
                   <Label className="text-sm font-medium text-[#2C241B]">Email or phone number</Label>
-                  <Input name="identifier" type="text" value={form.identifier} onChange={handleChange} required maxLength={254} autoComplete="username" autoCapitalize="none" spellCheck={false} className="mt-1 border-[#E3DCD2]" placeholder="you@example.com or 9876543210" data-testid="auth-identifier-input" />
+                  <Input
+                    name="identifier"
+                    type="text"
+                    value={form.identifier}
+                    onChange={handleChange}
+                    required
+                    maxLength={254}
+                    autoComplete="username"
+                    autoCapitalize="none"
+                    spellCheck={false}
+                    className="mt-1 border-[#E3DCD2]"
+                    placeholder={emailOnly ? "you@example.com" : phoneOnly ? "9876543210" : "you@example.com or 9876543210"}
+                    data-testid="auth-identifier-input"
+                  />
                   {!isLogin && (
-                    <p className="mt-1.5 text-xs text-[#5C5042]">
-                      We&apos;ll send a 6-digit code here to confirm it&apos;s yours.
+                    <p className="mt-1.5 text-xs text-[#5C5042]" data-testid="auth-identifier-hint">
+                      {emailOnly
+                        ? "We can only send codes by email at the moment, so please use an email address."
+                        : phoneOnly
+                          ? "We can only send codes by SMS at the moment, so please use a phone number."
+                          : "We'll send a 6-digit code here to confirm it's yours."}
                     </p>
                   )}
                 </div>
