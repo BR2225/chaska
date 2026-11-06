@@ -57,6 +57,18 @@ export function AuthProvider({ children }) {
     return data;
   };
 
+  // Saving here as well as at checkout keeps the copy the rest of the app
+  // reads in step with the server, so the next checkout starts filled in
+  // without a reload.
+  const saveDeliveryDetails = async (customerPhone, deliveryAddress) => {
+    const { data } = await http.put("/api/me/delivery-details", {
+      customer_phone: customerPhone,
+      delivery_address: deliveryAddress,
+    });
+    setUser(current => (current && current !== false ? { ...current, ...data } : current));
+    return data;
+  };
+
   const logout = async () => {
     try {
       await http.post("/api/auth/logout");
@@ -67,7 +79,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, saveDeliveryDetails }}>
       {children}
     </AuthContext.Provider>
   );

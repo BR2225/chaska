@@ -48,14 +48,21 @@ export default function Checkout() {
   const [paymentConfigLoading, setPaymentConfigLoading] = useState(true);
   const [form, setForm] = useState({ customer_name: "", customer_email: "", customer_phone: "", delivery_address: "", notes: "" });
 
-  // Auto-fill from logged-in user
+  // Auto-fill from the account, preferring what was saved from the last order
+  // so a returning customer only has to read the form, not retype it. The
+  // login phone is the fallback; it is an identity rather than a delivery
+  // number, so it only stands in when nothing has been saved yet.
   useEffect(() => {
     if (user && user !== false) {
       setForm(prev => ({
         ...prev,
         customer_name: prev.customer_name || user.name || "",
         customer_email: prev.customer_email || user.email || "",
-        customer_phone: prev.customer_phone || normalizePhone(user.phone) || "",
+        customer_phone: prev.customer_phone
+          || normalizePhone(user.delivery_phone)
+          || normalizePhone(user.phone)
+          || "",
+        delivery_address: prev.delivery_address || user.delivery_address || "",
       }));
     }
   }, [user]);
