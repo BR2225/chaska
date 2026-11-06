@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import http from "@/lib/http";
 import { useAuth } from "@/contexts/AuthContext";
+import DeliveryDetailsCard from "@/components/DeliveryDetailsCard";
 import { Package, Clock, CheckCircle, Truck, XCircle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { API_BASE_URL as API } from "@/config/api";
@@ -40,6 +41,8 @@ export default function MyOrders() {
         <h1 className="font-['Cormorant_Garamond'] text-4xl sm:text-5xl font-light text-[#2C241B] tracking-tighter mb-10">
           Orders
         </h1>
+
+        <DeliveryDetailsCard />
 
         {loading ? (
           <ChaskaLoader label="Loading your orders" fullScreen={false} className="rounded-2xl" />
