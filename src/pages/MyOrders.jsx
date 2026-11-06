@@ -4,6 +4,7 @@ import http from "@/lib/http";
 import { useAuth } from "@/contexts/AuthContext";
 import DeliveryDetailsCard from "@/components/DeliveryDetailsCard";
 import { Package, Clock, CheckCircle, Truck, XCircle, ArrowRight } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { API_BASE_URL as API } from "@/config/api";
 import ChaskaLoader from "@/components/ChaskaLoader";
@@ -23,6 +24,7 @@ export default function MyOrders() {
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cancelling, setCancelling] = useState("");
 
   useEffect(() => {
     if (user === false) { navigate("/login"); return; }
@@ -31,6 +33,30 @@ export default function MyOrders() {
       .then(r => { setOrders(r.data); setLoading(false); })
       .catch(() => setLoading(false));
   }, [user, navigate]);
+
+  // The server decides whether an order can still be cancelled, and says so
+  // per order, so this page never has to guess at the rule.
+  const handleCancel = async (order) => {
+    const paid = order.payment_status === "paid";
+    const question = paid
+      ? `Cancel ${order.id}? The \u20B9${order.total} you paid will be refunded, and takes 5-7 days to reach your account.`
+      : `Cancel ${order.id}?`;
+    if (!window.confirm(question)) return;
+    setCancelling(order.id);
+    try {
+      const { data } = await http.post(`${API}/api/orders/${encodeURIComponent(order.id)}/cancel`);
+      setOrders(current => current.map(o => (o.id === order.id ? { ...data.order, can_cancel: false } : o)));
+      toast.success(data.refunded ? "Order cancelled. Your refund is on its way." : "Order cancelled.");
+    } catch (err) {
+      const detail = err.response?.data?.detail;
+      toast.error(typeof detail === "string" ? detail : "Could not cancel this order. Please try again.");
+      // The reason is usually that the shop has just started it, so take the
+      // list again rather than leaving a button that cannot work.
+      http.get(`${API}/api/my-orders`).then(r => setOrders(r.data)).catch(() => {});
+    } finally {
+      setCancelling("");
+    }
+  };
 
   if (!user) return null;
 
@@ -104,6 +130,17 @@ export default function MyOrders() {
                         <Link to={`/checkout?retry=${encodeURIComponent(o.id)}`} className="text-xs text-white bg-[#D96C4A] hover:bg-[#C25D3E] font-medium rounded-full px-3 py-1.5 transition-colors">
                           Retry Payment
                         </Link>
+                      )}
+                      {o.can_cancel && (
+                        <button
+                          type="button"
+                          onClick={() => handleCancel(o)}
+                          disabled={cancelling === o.id}
+                          className="text-xs text-[#D3494E] hover:underline font-medium disabled:opacity-50"
+                          data-testid={`cancel-${o.id}`}
+                        >
+                          {cancelling === o.id ? "Cancelling..." : "Cancel"}
+                        </button>
                       )}
                       <Link to={`/track-order?id=${encodeURIComponent(o.id)}`} className="text-xs text-[#D96C4A] hover:text-[#C25D3E] font-medium flex items-center gap-1 transition-colors" data-testid={`track-${o.id}`}>
                         Track <ArrowRight className="w-3 h-3" />
