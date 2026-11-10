@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { API_BASE_URL as API } from "@/config/api";
 import ChaskaLoader from "@/components/ChaskaLoader";
 import VegMark from "@/components/VegMark";
+import { useFulfilment } from "@/contexts/FulfilmentContext";
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -18,6 +19,9 @@ export default function ProductDetail() {
   const [selectedSize, setSelectedSize] = useState(null);
   const [added, setAdded] = useState(false);
   const [checking, setChecking] = useState(false);
+  const { isDineIn, outlet } = useFulfilment();
+  // Availability is per counter, so every ask carries the branch.
+  const outletQuery = isDineIn && outlet ? `?outlet=${encodeURIComponent(outlet.code)}` : "";
   const { addItem } = useCart();
   const { user, loading: authLoading } = useAuth();
   const location = useLocation();
@@ -59,7 +63,7 @@ export default function ProductDetail() {
     // so confirm before it reaches the cart.
     setChecking(true);
     try {
-      const { data } = await http.get(`${API}/api/products/${encodeURIComponent(product.id)}`);
+      const { data } = await http.get(`${API}/api/products/${encodeURIComponent(product.id)}${outletQuery}`);
       if (!data.is_available) {
         setProduct(data);
         toast.error(`Sorry, ${product.name} just went out of stock.`);
