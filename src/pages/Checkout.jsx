@@ -4,7 +4,7 @@ import http from "@/lib/http";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFulfilment } from "@/contexts/FulfilmentContext";
-import { ArrowLeft, Check, Clock3, Truck, CreditCard } from "lucide-react";
+import { ArrowLeft, Check, Clock3, Truck, CreditCard, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +39,14 @@ export default function Checkout() {
   // The branch can be cleared from another tab while this page is open; a
   // dine in order without one would read outlet.code off nothing.
   const isDineIn = dineInChosen && Boolean(outlet?.code);
+  // Whatever "pay when it changes hands" is called here.
+  const payOnHandover = isDineIn ? "counter" : "cod";
+
+  useEffect(() => {
+    setPaymentMethod(current => (
+      current === "razorpay" ? current : payOnHandover
+    ));
+  }, [payOnHandover]);
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -188,7 +196,7 @@ export default function Checkout() {
 
       if (paymentMethod === "razorpay") {
         if (!onlinePaymentAvailable) {
-          toast.error("Online payment is currently unavailable. Please use Cash on Delivery.");
+          toast.error(`Online payment is currently unavailable. Please choose ${isDineIn ? "Pay at Counter" : "Cash on Delivery"}.`);
           return;
         }
         const checkoutLoaded = await loadRazorpayCheckout();
@@ -315,7 +323,11 @@ export default function Checkout() {
           <p className="text-sm text-[#5C5042] bg-[#F4F0E6] rounded-lg p-4 mb-6">
             Order ID: <span className="font-semibold text-[#2C241B]" data-testid="order-id">{orderPlaced.id}</span>
             <br />Total: <span className="font-semibold text-[#D96C4A]">&#8377;{orderPlaced.total}</span>
-            <br />Payment: <span className="capitalize">{orderPlaced.payment_method === "cod" ? "Cash on Delivery" : "Online Payment"}</span>
+            <br />Payment: <span>{
+              orderPlaced.payment_method === "cod" ? "Cash on Delivery"
+                : orderPlaced.payment_method === "counter" ? "Pay at Counter"
+                  : "Online Payment"
+            }</span>
           </p>
           <Link to="/menu">
             <Button className="bg-[#D96C4A] text-white hover:bg-[#C25D3E] rounded-full px-8" data-testid="continue-shopping-btn">
@@ -447,12 +459,18 @@ export default function Checkout() {
                   <h2 className="font-['Cormorant_Garamond'] text-2xl font-medium text-[#2C241B] mb-6">Payment Method</h2>
                   <div className="space-y-3">
                     {!retryOrder && (
-                      <label className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${paymentMethod === "cod" ? "border-[#D96C4A] bg-[#D96C4A]/5" : "border-[#E3DCD2] hover:border-[#D96C4A]/50"}`} data-testid="payment-cod">
-                        <input type="radio" name="payment" value="cod" checked={paymentMethod === "cod"} onChange={() => setPaymentMethod("cod")} className="accent-[#D96C4A]" />
-                        <Truck className="w-5 h-5 text-[#5C5042]" strokeWidth={1.5} />
+                      <label className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${paymentMethod === payOnHandover ? "border-[#D96C4A] bg-[#D96C4A]/5" : "border-[#E3DCD2] hover:border-[#D96C4A]/50"}`} data-testid={`payment-${payOnHandover}`}>
+                        <input type="radio" name="payment" value={payOnHandover} checked={paymentMethod === payOnHandover} onChange={() => setPaymentMethod(payOnHandover)} className="accent-[#D96C4A]" />
+                        {isDineIn
+                          ? <Store className="w-5 h-5 text-[#5C5042]" strokeWidth={1.5} />
+                          : <Truck className="w-5 h-5 text-[#5C5042]" strokeWidth={1.5} />}
                         <div>
-                          <p className="font-medium text-sm text-[#2C241B]">Cash on Delivery</p>
-                          <p className="text-xs text-[#5C5042]">Pay when your order arrives</p>
+                          <p className="font-medium text-sm text-[#2C241B]">
+                            {isDineIn ? "Pay at Counter" : "Cash on Delivery"}
+                          </p>
+                          <p className="text-xs text-[#5C5042]">
+                            {isDineIn ? "Pay when you collect your order" : "Pay when your order arrives"}
+                          </p>
                         </div>
                       </label>
                     )}

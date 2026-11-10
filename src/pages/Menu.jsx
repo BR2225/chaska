@@ -5,6 +5,8 @@ import ProductCard from "@/components/ProductCard";
 import { API_BASE_URL as API } from "@/config/api";
 import ChaskaLoader from "@/components/ChaskaLoader";
 import { useFulfilment } from "@/contexts/FulfilmentContext";
+import FulfilmentChooser from "@/components/FulfilmentChooser";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Store, Bike } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -13,7 +15,7 @@ export default function Menu() {
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const activeCategory = searchParams.get("category") || "all";
-  const { mode, outlet } = useFulfilment();
+  const { mode, outlet, hasChosen, chooseDelivery } = useFulfilment();
   const outletCode = mode === "dine_in" ? outlet?.code : null;
 
   const lastLoadedAt = useRef(0);
@@ -72,6 +74,27 @@ export default function Menu() {
 
   return (
     <div className="pt-24 sm:pt-28 pb-16" data-testid="menu-page">
+      {/* Asked once, on the way in. The menu is readable behind it, so this
+          informs the browsing rather than standing in front of it. */}
+      <Dialog
+        open={!hasChosen}
+        onOpenChange={(open) => { if (!open) chooseDelivery(); }}
+      >
+        <DialogContent
+          className="sm:max-w-md bg-[#FDF0DB] border-[#E3DCD2]"
+          data-testid="fulfilment-gate"
+        >
+          <DialogTitle className="font-['Cormorant_Garamond'] text-2xl font-medium text-[#2C241B]">
+            How would you like your order?
+          </DialogTitle>
+          <DialogDescription className="text-sm text-[#5C5042] -mt-1">
+            Branches keep their own counters, so this decides what we show as
+            available. Closing this picks delivery; you can change it any time.
+          </DialogDescription>
+          <FulfilmentChooser compact />
+        </DialogContent>
+      </Dialog>
+
       {/* Header */}
       <div className="max-w-7xl mx-auto px-6 sm:px-8 mb-12">
         <p className="text-sm uppercase tracking-[0.2em] text-[#D96C4A] mb-3 font-medium">Our Menu</p>
@@ -79,21 +102,37 @@ export default function Menu() {
           Discover Our Desserts
         </h1>
 
-        {/* Which counter this menu is showing. Availability differs between
-            branches, so leaving it unsaid invites ordering from the wrong one. */}
-        <Link
-          to="/dine-in"
-          className="inline-flex items-center gap-2 text-xs text-[#5C5042] hover:text-[#D96C4A] border border-[#E3DCD2] rounded-full px-4 py-2 mb-6 transition-colors"
-          data-testid="menu-fulfilment"
-        >
-          {mode === "dine_in" ? <Store className="w-3.5 h-3.5" /> : <Bike className="w-3.5 h-3.5" />}
-          {mode === "dine_in"
-            ? <>Showing what&apos;s on the counter at <span className="font-medium text-[#2C241B]">{outlet?.name}</span></>
-            : mode === "delivery"
-              ? <>Showing what we can <span className="font-medium text-[#2C241B]">deliver</span></>
-              : <>Choose <span className="font-medium text-[#2C241B]">delivery or dine in</span></>}
-          <span className="text-[#D96C4A] font-medium">Change</span>
-        </Link>
+        {/* Availability differs between counters, so which one this menu is
+            showing has to be impossible to miss, not a line of grey text. */}
+        {mode && (
+          <div
+            className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border border-[#E3DCD2] bg-white px-5 py-4 mb-8 shadow-[0_4px_20px_rgb(44,36,27,0.04)]"
+            data-testid="menu-fulfilment"
+          >
+            <span className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+              mode === "dine_in" ? "bg-[#8A9A5B]/12" : "bg-[#D96C4A]/12"
+            }`}>
+              {mode === "dine_in"
+                ? <Store className="w-4.5 h-4.5 text-[#8A9A5B]" strokeWidth={1.5} />
+                : <Bike className="w-4.5 h-4.5 text-[#D96C4A]" strokeWidth={1.5} />}
+            </span>
+            <span className="min-w-0">
+              <span className="block text-[11px] uppercase tracking-[0.15em] text-[#5C5042]">
+                {mode === "dine_in" ? "Dining in at" : "Ordering for"}
+              </span>
+              <span className="block text-base font-medium text-[#2C241B] truncate">
+                {mode === "dine_in" ? outlet?.name : "Delivery"}
+              </span>
+            </span>
+            <Link
+              to="/dine-in"
+              className="ml-auto text-sm font-medium text-white bg-[#D96C4A] hover:bg-[#C25D3E] rounded-full px-5 py-2 transition-colors shrink-0"
+              data-testid="menu-fulfilment-change"
+            >
+              Change
+            </Link>
+          </div>
+        )}
 
         {/* Category Filter */}
         <div className="flex flex-wrap gap-3" data-testid="category-filter">
