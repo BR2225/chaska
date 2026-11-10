@@ -33,7 +33,7 @@ function describeError(err) {
 }
 
 export default function Checkout() {
-  const { items, total, clearCart } = useCart();
+  const { items, total, clearCart, removeItem } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -44,6 +44,8 @@ export default function Checkout() {
   const [pendingPaymentOrder, setPendingPaymentOrder] = useState(null);
   const [retryOrder, setRetryOrder] = useState(null);
   const [retryOrderLoading, setRetryOrderLoading] = useState(Boolean(retryOrderId));
+  // Items in the cart that the shop has since marked out of stock.
+  const [soldOut, setSoldOut] = useState([]);
   const [onlinePaymentAvailable, setOnlinePaymentAvailable] = useState(false);
   const [paymentConfigLoading, setPaymentConfigLoading] = useState(true);
   const [form, setForm] = useState({ customer_name: "", customer_email: "", customer_phone: "", delivery_address: "", notes: "" });
@@ -125,6 +127,24 @@ export default function Checkout() {
       }))
     : items;
   const checkoutTotal = retryOrder?.total ?? total;
+
+  // The cart can sit for a long time before anyone reaches this page, so check
+  // it on arrival. The server refuses an out of stock item when the order is
+  // placed, but that is after the whole form has been filled in.
+  useEffect(() => {
+    if (retryOrderId || items.length === 0) { setSoldOut([]); return; }
+    let active = true;
+    http.get(`${API}/api/products`)
+      .then(({ data }) => {
+        if (!active) return;
+        const unavailable = new Set(
+          data.filter(product => !product.is_available).map(product => product.id),
+        );
+        setSoldOut(items.filter(item => unavailable.has(item.productId)));
+      })
+      .catch(() => { /* the server still refuses it at the end */ });
+    return () => { active = false; };
+  }, [items, retryOrderId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -324,7 +344,38 @@ export default function Checkout() {
             <Link to="/menu"><Button className="bg-[#D96C4A] text-white hover:bg-[#C25D3E] rounded-full px-8">Browse Menu</Button></Link>
           </div>
         ) : (
-          <form onSubmit={handleSubmit}>
+          <>
+          {soldOut.length > 0 && (
+          <div
+            className="mb-6 rounded-2xl border border-[#D3494E]/25 bg-[#D3494E]/[0.06] px-5 py-4"
+            role="alert"
+            data-testid="sold-out-notice"
+          >
+            <p className="text-sm font-medium text-[#2C241B] mb-2">
+              {soldOut.length === 1 ? "One item is" : `${soldOut.length} items are`} no longer available
+            </p>
+            <ul className="space-y-2">
+              {soldOut.map(item => (
+                <li key={item.itemId} className="flex items-center justify-between gap-4 text-sm">
+                  <span className="text-[#5C5042]">{item.name} ({item.size})</span>
+                  <button
+                    type="button"
+                    onClick={() => removeItem(item.itemId)}
+                    className="text-[#D3494E] font-medium hover:underline shrink-0"
+                    data-testid={`remove-sold-out-${item.itemId}`}
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-xs text-[#5C5042]">
+              Remove {soldOut.length === 1 ? "it" : "them"} to carry on with the rest of your order.
+            </p>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
               {/* Form */}
               <div className="lg:col-span-7 space-y-6">
@@ -414,7 +465,7 @@ export default function Checkout() {
                   </div>
                   <Button
                     type="submit"
-                    disabled={loading || (paymentMethod === "razorpay" && !onlinePaymentAvailable)}
+                    disabled={loading || soldOut.length > 0 || (paymentMethod === "razorpay" && !onlinePaymentAvailable)}
                     className="w-full bg-[#D96C4A] text-white hover:bg-[#C25D3E] rounded-full h-12 text-base font-medium"
                     data-testid="place-order-btn"
                   >
@@ -428,6 +479,7 @@ export default function Checkout() {
               </div>
             </div>
           </form>
+          </>
         )}
       </div>
     </div>

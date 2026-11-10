@@ -1,19 +1,25 @@
 import { useState, useMemo } from "react";
 import { Plus, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import http from "@/lib/http";
+import { API_BASE_URL as API } from "@/config/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import VegMark from "@/components/VegMark";
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, onSoldOut }) {
   const { addItem } = useCart();
   const { user, loading: authLoading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || null);
   const [added, setAdded] = useState(false);
-  const outOfStock = !product.is_available;
+  const [checking, setChecking] = useState(false);
+  // What we learned by asking just now, which outranks the copy this page was
+  // rendered from: the shop may have sold the last one since it loaded.
+  const [soldOutSinceLoad, setSoldOutSinceLoad] = useState(false);
+  const outOfStock = !product.is_available || soldOutSinceLoad;
 
   // Products carrying several shots let the visitor step through them; the rest
   // keep the one image they have always had.
@@ -31,7 +37,7 @@ export default function ProductCard({ product }) {
     setShotIndex((next + gallery.length) % gallery.length);
   };
 
-  const handleAdd = (e) => {
+  const handleAdd = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (outOfStock) return;
@@ -43,6 +49,23 @@ export default function ProductCard({ product }) {
       toast.info("Sign in or create an account to add items to your cart.");
       navigate("/login", { state: { from: location, reason: "cart" } });
       return;
+    }
+    // Confirm it is still for sale before it reaches the cart. This page may
+    // have been open since before the shop marked it out of stock.
+    setChecking(true);
+    try {
+      const { data } = await http.get(`${API}/api/products/${encodeURIComponent(product.id)}`);
+      if (!data.is_available) {
+        setSoldOutSinceLoad(true);
+        onSoldOut?.(product.id);
+        toast.error(`Sorry, ${product.name} just went out of stock.`);
+        return;
+      }
+    } catch {
+      // Could not ask. Let it through rather than block a sale on a dropped
+      // request; the server refuses an out of stock item at checkout anyway.
+    } finally {
+      setChecking(false);
     }
     if (!addItem(product, selectedSize)) return;
     setAdded(true);
@@ -160,7 +183,7 @@ export default function ProductCard({ product }) {
             </span>
             <button
               onClick={handleAdd}
-              disabled={added || outOfStock}
+              disabled={added || outOfStock || checking}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
                 outOfStock
                   ? "bg-[#E3DCD2] text-[#5C5042] cursor-not-allowed"
@@ -170,7 +193,13 @@ export default function ProductCard({ product }) {
               }`}
               data-testid={`add-to-cart-${product.id}`}
             >
-              {outOfStock ? "Out of Stock" : added ? <><Check className="w-4 h-4" /> Added</> : <><Plus className="w-4 h-4" /> Add</>}
+              {outOfStock
+                ? "Out of Stock"
+                : checking
+                  ? "Checking..."
+                  : added
+                    ? <><Check className="w-4 h-4" /> Added</>
+                    : <><Plus className="w-4 h-4" /> Add</>}
             </button>
           </div>
         </div>
