@@ -20,7 +20,7 @@ const emptyProduct = { name: "", category: "bomboloni", description: "", price: 
 const toProductPayload = (p) => ({ name: p.name, category: p.category, description: p.description, price: p.price, image: p.image, images: p.images || [], sizes: p.sizes || [], is_available: p.is_available, featured: p.featured });
 
 export default function AdminProducts() {
-  const { scope, isOnline, scopeLabel, reloadOutlets } = useAdminScope();
+  const { scope, outlet, isOnline, scopeLabel, reloadOutlets } = useAdminScope();
   const [products, setProducts] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -30,11 +30,17 @@ export default function AdminProducts() {
 
   // Availability is read through whichever counter is selected, so the
   // switches show that branch's stock rather than the online list.
+  // Always the plain listing. The public ?outlet= view refuses a branch that
+  // is closed, which would lock the admin out of the one place they can
+  // reopen it; the branch's own list is already to hand, so apply it here.
   const load = useCallback(
-    () => http
-      .get(`${API}/api/products${isOnline ? "" : `?outlet=${encodeURIComponent(scope)}`}`)
-      .then(r => setProducts(r.data)),
-    [isOnline, scope],
+    () => http.get(`${API}/api/products`).then(r => {
+      const off = new Set(outlet?.unavailable_product_ids || []);
+      setProducts(isOnline
+        ? r.data
+        : r.data.map(p => ({ ...p, is_available: !off.has(p.id) })));
+    }),
+    [isOnline, outlet],
   );
   useEffect(() => { load(); }, [load]);
 

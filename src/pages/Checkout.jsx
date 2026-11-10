@@ -35,7 +35,10 @@ function describeError(err) {
 
 export default function Checkout() {
   const { items, total, clearCart, removeItem } = useCart();
-  const { outlet, isDineIn } = useFulfilment();
+  const { outlet, isDineIn: dineInChosen } = useFulfilment();
+  // The branch can be cleared from another tab while this page is open; a
+  // dine in order without one would read outlet.code off nothing.
+  const isDineIn = dineInChosen && Boolean(outlet?.code);
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
