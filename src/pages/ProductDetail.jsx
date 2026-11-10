@@ -17,6 +17,7 @@ export default function ProductDetail() {
   const [reloadKey, setReloadKey] = useState(0);
   const [selectedSize, setSelectedSize] = useState(null);
   const [added, setAdded] = useState(false);
+  const [checking, setChecking] = useState(false);
   const { addItem } = useCart();
   const { user, loading: authLoading } = useAuth();
   const location = useLocation();
@@ -43,7 +44,7 @@ export default function ProductDetail() {
     return () => { cancelled = true; };
   }, [id, reloadKey]);
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     if (!product || !product.is_available) return;
     if (authLoading) {
       toast.info("Checking your account. Please try again in a moment.");
@@ -53,6 +54,22 @@ export default function ProductDetail() {
       toast.info("Sign in or create an account to add items to your cart.");
       navigate("/login", { state: { from: location, reason: "cart" } });
       return;
+    }
+    // This page may have been open since before the shop sold the last one,
+    // so confirm before it reaches the cart.
+    setChecking(true);
+    try {
+      const { data } = await http.get(`${API}/api/products/${encodeURIComponent(product.id)}`);
+      if (!data.is_available) {
+        setProduct(data);
+        toast.error(`Sorry, ${product.name} just went out of stock.`);
+        return;
+      }
+    } catch {
+      // Could not ask. Let it through rather than lose a sale to a dropped
+      // request; the server refuses an out of stock item at checkout anyway.
+    } finally {
+      setChecking(false);
     }
     if (!addItem(product, selectedSize)) return;
     setAdded(true);
@@ -155,13 +172,19 @@ export default function ProductDetail() {
               <span className="font-['Cormorant_Garamond'] text-4xl font-semibold text-[#2C241B]">&#8377;{displayPrice}</span>
               <Button
                 onClick={handleAdd}
-                disabled={added || outOfStock}
+                disabled={added || outOfStock || checking}
                 className={`rounded-full px-8 py-3 h-auto text-base font-medium transition-all duration-300 ${
                   outOfStock ? "bg-[#E3DCD2] text-[#5C5042]" : added ? "bg-[#4A7c59] text-white" : "bg-[#D96C4A] text-white hover:bg-[#C25D3E] hover:shadow-lg"
                 }`}
                 data-testid="detail-add-to-cart"
               >
-                {outOfStock ? "Out of Stock" : added ? <><Check className="w-4 h-4 mr-2" /> Added to Cart</> : <><Plus className="w-4 h-4 mr-2" /> Add to Cart</>}
+                {outOfStock
+                  ? "Out of Stock"
+                  : checking
+                    ? "Checking..."
+                    : added
+                      ? <><Check className="w-4 h-4 mr-2" /> Added to Cart</>
+                      : <><Plus className="w-4 h-4 mr-2" /> Add to Cart</>}
               </Button>
             </div>
 

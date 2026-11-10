@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import http from "@/lib/http";
 import ProductCard from "@/components/ProductCard";
@@ -11,12 +11,44 @@ export default function Menu() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeCategory = searchParams.get("category") || "all";
 
-  useEffect(() => {
+  const lastLoadedAt = useRef(0);
+
+  const loadProducts = useCallback(({ quiet } = {}) => {
     const params = activeCategory !== "all" ? `?category=${activeCategory}` : "";
-    http.get(`${API}/api/products${params}`)
-      .then(r => { setProducts(r.data); setLoading(false); })
-      .catch(() => setLoading(false));
+    if (!quiet) setLoading(true);
+    return http.get(`${API}/api/products${params}`)
+      .then(r => { setProducts(r.data); lastLoadedAt.current = Date.now(); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [activeCategory]);
+
+  useEffect(() => { loadProducts(); }, [loadProducts]);
+
+  // A menu left open does not know the shop has sold out of something. Fetch
+  // again when the tab is looked at after a while, quietly, so the page is
+  // simply right rather than correcting itself in front of the reader.
+  useEffect(() => {
+    const STALE_AFTER_MS = 30000;
+    const refreshIfStale = () => {
+      if (document.visibilityState !== "visible") return;
+      if (Date.now() - lastLoadedAt.current < STALE_AFTER_MS) return;
+      loadProducts({ quiet: true });
+    };
+    window.addEventListener("focus", refreshIfStale);
+    document.addEventListener("visibilitychange", refreshIfStale);
+    return () => {
+      window.removeEventListener("focus", refreshIfStale);
+      document.removeEventListener("visibilitychange", refreshIfStale);
+    };
+  }, [loadProducts]);
+
+  // One card discovering it is sold out tells the rest of the page, so the
+  // same item is not still offered further down the list.
+  const markSoldOut = useCallback((productId) => {
+    setProducts(current => current.map(p => (
+      p.id === productId ? { ...p, is_available: false } : p
+    )));
+  }, []);
 
   const categories = [
     { value: "all", label: "All" },
@@ -62,7 +94,7 @@ export default function Menu() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="products-grid">
-            {products.map(p => <ProductCard key={p.id} product={p} />)}
+            {products.map(p => <ProductCard key={p.id} product={p} onSoldOut={markSoldOut} />)}
           </div>
         )}
       </div>
