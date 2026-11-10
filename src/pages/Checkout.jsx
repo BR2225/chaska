@@ -4,7 +4,9 @@ import http from "@/lib/http";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFulfilment } from "@/contexts/FulfilmentContext";
-import { ArrowLeft, Check, Clock3, Truck, CreditCard } from "lucide-react";
+import AddressDialog from "@/components/AddressDialog";
+import { MapPin, Plus, Pencil } from "lucide-react";
+import { ArrowLeft, Check, Clock3, Truck, CreditCard, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +41,19 @@ export default function Checkout() {
   // The branch can be cleared from another tab while this page is open; a
   // dine in order without one would read outlet.code off nothing.
   const isDineIn = dineInChosen && Boolean(outlet?.code);
+  // Whatever "pay when it changes hands" is called here.
+  const payOnHandover = isDineIn ? "counter" : "cod";
+  const [addresses, setAddresses] = useState([]);
+  const [addressesLoaded, setAddressesLoaded] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState("");
+  const [addressDialogOpen, setAddressDialogOpen] = useState(false);
+  const [editingAddress, setEditingAddress] = useState(null);
+
+  useEffect(() => {
+    setPaymentMethod(current => (
+      current === "razorpay" ? current : payOnHandover
+    ));
+  }, [payOnHandover]);
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -159,6 +174,40 @@ export default function Checkout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cartKey, retryOrderId, isDineIn, outlet]);
 
+  useEffect(() => {
+    if (isDineIn || retryOrderId) { setAddressesLoaded(true); return; }
+    let active = true;
+    http.get(`${API}/api/me/addresses`)
+      .then(({ data }) => {
+        if (!active) return;
+        setAddresses(data);
+        setSelectedAddressId(current => current || (data.find(a => a.is_default) || data[0])?.id || "");
+      })
+      .catch(() => {})
+      .finally(() => { if (active) setAddressesLoaded(true); });
+    return () => { active = false; };
+  }, [isDineIn, retryOrderId]);
+
+  const selectedAddress = addresses.find(a => a.id === selectedAddressId) || null;
+
+  // The chosen address is what the order is actually sent with, so the form
+  // follows it rather than the two drifting apart.
+  useEffect(() => {
+    if (!selectedAddress) return;
+    setForm(prev => ({
+      ...prev,
+      customer_phone: selectedAddress.customer_phone,
+      delivery_address: selectedAddress.delivery_address,
+    }));
+  }, [selectedAddress]);
+
+  const handleAddressSaved = (book, editedId) => {
+    setAddresses(book);
+    // Land on whatever was just added, or stay on what was being edited.
+    const added = editedId ? null : book.find(a => !addresses.some(old => old.id === a.id));
+    setSelectedAddressId(added?.id || editedId || selectedAddressId);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: name === "customer_phone" ? normalizePhone(value) : value }));
@@ -167,6 +216,10 @@ export default function Checkout() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!retryOrder && items.length === 0) { toast.error("Your cart is empty"); return; }
+    if (!isDineIn && !retryOrder && !selectedAddress) {
+      toast.error("Choose a delivery address, or add one.");
+      return;
+    }
     if (!form.customer_name || !form.customer_phone || (!isDineIn && !form.delivery_address)) {
       toast.error("Please fill in all required fields");
       return;
@@ -188,7 +241,7 @@ export default function Checkout() {
 
       if (paymentMethod === "razorpay") {
         if (!onlinePaymentAvailable) {
-          toast.error("Online payment is currently unavailable. Please use Cash on Delivery.");
+          toast.error(`Online payment is currently unavailable. Please choose ${isDineIn ? "Pay at Counter" : "Cash on Delivery"}.`);
           return;
         }
         const checkoutLoaded = await loadRazorpayCheckout();
@@ -315,7 +368,11 @@ export default function Checkout() {
           <p className="text-sm text-[#5C5042] bg-[#F4F0E6] rounded-lg p-4 mb-6">
             Order ID: <span className="font-semibold text-[#2C241B]" data-testid="order-id">{orderPlaced.id}</span>
             <br />Total: <span className="font-semibold text-[#D96C4A]">&#8377;{orderPlaced.total}</span>
-            <br />Payment: <span className="capitalize">{orderPlaced.payment_method === "cod" ? "Cash on Delivery" : "Online Payment"}</span>
+            <br />Payment: <span>{
+              orderPlaced.payment_method === "cod" ? "Cash on Delivery"
+                : orderPlaced.payment_method === "counter" ? "Pay at Counter"
+                  : "Online Payment"
+            }</span>
           </p>
           <Link to="/menu">
             <Button className="bg-[#D96C4A] text-white hover:bg-[#C25D3E] rounded-full px-8" data-testid="continue-shopping-btn">
@@ -390,6 +447,13 @@ export default function Checkout() {
           </div>
         )}
 
+        <AddressDialog
+          open={addressDialogOpen}
+          onOpenChange={setAddressDialogOpen}
+          address={editingAddress}
+          onSaved={handleAddressSaved}
+        />
+
         <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
               {/* Form */}
@@ -429,10 +493,91 @@ export default function Checkout() {
                           Change branch
                         </Link>
                       </div>
-                    ) : (
+                    ) : retryOrder ? (
                       <div>
-                        <Label htmlFor="delivery_address" className="text-sm font-medium text-[#2C241B]">Delivery Address *</Label>
-                        <Textarea name="delivery_address" value={form.delivery_address} onChange={handleChange} readOnly={Boolean(retryOrder)} required rows={3} className="mt-1 border-[#E3DCD2] focus:ring-[#D96C4A]" data-testid="input-address" />
+                        <Label className="text-sm font-medium text-[#2C241B]">Delivery Address</Label>
+                        <Textarea name="delivery_address" value={form.delivery_address} readOnly rows={3} className="mt-1 border-[#E3DCD2]" data-testid="input-address" />
+                      </div>
+                    ) : (
+                      /* Picked from the book rather than typed out again. The
+                         form still carries the values, so what is sent cannot
+                         drift from what is shown. */
+                      <div data-testid="address-picker">
+                        <div className="flex items-center justify-between gap-3 mb-2">
+                          <Label className="text-sm font-medium text-[#2C241B]">Deliver to *</Label>
+                          <button
+                            type="button"
+                            onClick={() => { setEditingAddress(null); setAddressDialogOpen(true); }}
+                            className="inline-flex items-center gap-1 text-xs font-medium text-[#D96C4A] hover:underline"
+                            data-testid="add-address-btn"
+                          >
+                            <Plus className="w-3.5 h-3.5" /> Add address
+                          </button>
+                        </div>
+
+                        {!addressesLoaded ? (
+                          <p className="text-sm text-[#5C5042]">Loading your addresses...</p>
+                        ) : addresses.length === 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => { setEditingAddress(null); setAddressDialogOpen(true); }}
+                            className="w-full rounded-xl border border-dashed border-[#E3DCD2] px-4 py-6 text-center hover:border-[#D96C4A] transition-colors"
+                            data-testid="no-addresses"
+                          >
+                            <MapPin className="w-5 h-5 text-[#D96C4A] mx-auto mb-2" strokeWidth={1.5} />
+                            <p className="text-sm font-medium text-[#2C241B]">Add a delivery address</p>
+                            <p className="text-xs text-[#5C5042] mt-0.5">We&apos;ll save it for next time.</p>
+                          </button>
+                        ) : (
+                          <div className="space-y-2">
+                            {addresses.map(entry => (
+                              <label
+                                key={entry.id}
+                                className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
+                                  selectedAddressId === entry.id
+                                    ? "border-[#D96C4A] bg-[#D96C4A]/5"
+                                    : "border-[#E3DCD2] hover:border-[#D96C4A]/50"
+                                }`}
+                                data-testid={`address-option-${entry.id}`}
+                              >
+                                <input
+                                  type="radio"
+                                  name="address"
+                                  checked={selectedAddressId === entry.id}
+                                  onChange={() => setSelectedAddressId(entry.id)}
+                                  className="accent-[#D96C4A] mt-1"
+                                />
+                                <span className="min-w-0 flex-1">
+                                  <span className="flex items-center gap-2">
+                                    <span className="text-sm font-medium text-[#2C241B]">{entry.label}</span>
+                                    {entry.is_default && (
+                                      <span className="text-[10px] uppercase tracking-[0.1em] text-[#4A7c59] bg-[#4A7c59]/10 rounded-full px-2 py-0.5">
+                                        Default
+                                      </span>
+                                    )}
+                                  </span>
+                                  <span className="block text-xs text-[#5C5042] mt-0.5 leading-relaxed">
+                                    {entry.delivery_address}
+                                  </span>
+                                  <span className="block text-xs text-[#5C5042] mt-0.5">{entry.customer_phone}</span>
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setEditingAddress(entry);
+                                    setAddressDialogOpen(true);
+                                  }}
+                                  className="text-[#5C5042] hover:text-[#D96C4A] shrink-0"
+                                  aria-label={`Edit ${entry.label}`}
+                                  data-testid={`edit-address-${entry.id}`}
+                                >
+                                  <Pencil className="w-3.5 h-3.5" />
+                                </button>
+                              </label>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                     <div>
@@ -447,12 +592,18 @@ export default function Checkout() {
                   <h2 className="font-['Cormorant_Garamond'] text-2xl font-medium text-[#2C241B] mb-6">Payment Method</h2>
                   <div className="space-y-3">
                     {!retryOrder && (
-                      <label className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${paymentMethod === "cod" ? "border-[#D96C4A] bg-[#D96C4A]/5" : "border-[#E3DCD2] hover:border-[#D96C4A]/50"}`} data-testid="payment-cod">
-                        <input type="radio" name="payment" value="cod" checked={paymentMethod === "cod"} onChange={() => setPaymentMethod("cod")} className="accent-[#D96C4A]" />
-                        <Truck className="w-5 h-5 text-[#5C5042]" strokeWidth={1.5} />
+                      <label className={`flex items-center gap-4 p-4 rounded-xl border cursor-pointer transition-all ${paymentMethod === payOnHandover ? "border-[#D96C4A] bg-[#D96C4A]/5" : "border-[#E3DCD2] hover:border-[#D96C4A]/50"}`} data-testid={`payment-${payOnHandover}`}>
+                        <input type="radio" name="payment" value={payOnHandover} checked={paymentMethod === payOnHandover} onChange={() => setPaymentMethod(payOnHandover)} className="accent-[#D96C4A]" />
+                        {isDineIn
+                          ? <Store className="w-5 h-5 text-[#5C5042]" strokeWidth={1.5} />
+                          : <Truck className="w-5 h-5 text-[#5C5042]" strokeWidth={1.5} />}
                         <div>
-                          <p className="font-medium text-sm text-[#2C241B]">Cash on Delivery</p>
-                          <p className="text-xs text-[#5C5042]">Pay when your order arrives</p>
+                          <p className="font-medium text-sm text-[#2C241B]">
+                            {isDineIn ? "Pay at Counter" : "Cash on Delivery"}
+                          </p>
+                          <p className="text-xs text-[#5C5042]">
+                            {isDineIn ? "Pay when you collect your order" : "Pay when your order arrives"}
+                          </p>
                         </div>
                       </label>
                     )}

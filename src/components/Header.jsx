@@ -13,20 +13,15 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { itemCount } = useCart();
   const { user, logout } = useAuth();
-  const { mode, outlet, dineInAvailable } = useFulfilment();
+  const { mode, outlet } = useFulfilment();
   const location = useLocation();
   const isAdmin = location.pathname.startsWith("/admin");
 
   if (isAdmin) return null;
 
-  const signedIn = Boolean(user) && user !== false;
-
   const navLinks = [
     { to: "/", label: "Home" },
     { to: "/menu", label: "Menu" },
-    // Only worth offering to somebody who can actually place the order, and
-    // only while there is a branch to eat at.
-    ...(signedIn && dineInAvailable ? [{ to: "/dine-in", label: "Dine In" }] : []),
     { to: "/my-orders", label: "Orders" },
     { to: "/contact", label: "Contact" },
     { to: "/our-story", label: "Our Story" },
@@ -66,12 +61,15 @@ export default function Header() {
         {mode && (
           <Link
             to="/dine-in"
-            className="hidden lg:inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] font-medium text-[#5C5042] hover:text-[#D96C4A] border border-[#E3DCD2] rounded-full px-3 py-1.5 transition-colors"
+            className="hidden sm:inline-flex items-center gap-2 text-xs font-medium rounded-full pl-3 pr-2 py-1.5 bg-[#2C241B] text-[#FDF0DB] hover:bg-[#43382B] transition-colors max-w-[15rem]"
             title="Change how you receive your order"
             data-testid="fulfilment-indicator"
           >
-            {mode === "dine_in" ? <Store className="w-3.5 h-3.5" /> : <Bike className="w-3.5 h-3.5" />}
-            {mode === "dine_in" ? outlet?.name : "Delivery"}
+            {mode === "dine_in" ? <Store className="w-3.5 h-3.5 shrink-0" /> : <Bike className="w-3.5 h-3.5 shrink-0" />}
+            <span className="truncate">{mode === "dine_in" ? outlet?.name : "Delivery"}</span>
+            <span className="text-[10px] uppercase tracking-[0.1em] bg-[#FDF0DB]/15 rounded-full px-2 py-0.5 shrink-0">
+              Change
+            </span>
           </Link>
         )}
 
