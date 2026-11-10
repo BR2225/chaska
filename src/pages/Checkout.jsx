@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import http from "@/lib/http";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useFulfilment } from "@/contexts/FulfilmentContext";
 import { ArrowLeft, Check, Clock3, Truck, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,10 @@ function describeError(err) {
 
 export default function Checkout() {
   const { items, total, clearCart, removeItem } = useCart();
+  const { outlet, isDineIn: dineInChosen } = useFulfilment();
+  // The branch can be cleared from another tab while this page is open; a
+  // dine in order without one would read outlet.code off nothing.
+  const isDineIn = dineInChosen && Boolean(outlet?.code);
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -139,7 +144,7 @@ export default function Checkout() {
   useEffect(() => {
     if (retryOrderId || !cartKey) { setSoldOut(current => (current.length ? [] : current)); return; }
     let active = true;
-    http.get(`${API}/api/products`)
+    http.get(`${API}/api/products${isDineIn ? `?outlet=${encodeURIComponent(outlet.code)}` : ""}`)
       .then(({ data }) => {
         if (!active) return;
         const unavailable = new Set(
@@ -152,7 +157,7 @@ export default function Checkout() {
     // items is read inside but deliberately not a dependency; cartKey is its
     // stable stand-in.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cartKey, retryOrderId]);
+  }, [cartKey, retryOrderId, isDineIn, outlet]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -162,7 +167,7 @@ export default function Checkout() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!retryOrder && items.length === 0) { toast.error("Your cart is empty"); return; }
-    if (!form.customer_name || !form.customer_phone || !form.delivery_address) {
+    if (!form.customer_name || !form.customer_phone || (!isDineIn && !form.delivery_address)) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -176,6 +181,8 @@ export default function Checkout() {
       const orderData = {
         ...form,
         items: items.map(i => ({ product_id: i.productId, size: i.size, quantity: i.quantity })),
+        fulfilment: isDineIn ? "dine_in" : "delivery",
+        ...(isDineIn ? { outlet_code: outlet.code, delivery_address: "" } : {}),
         payment_method: paymentMethod,
       };
 
@@ -409,10 +416,25 @@ export default function Checkout() {
                         <Input name="customer_phone" type="tel" inputMode="numeric" autoComplete="tel" maxLength={10} placeholder="10-digit mobile" value={form.customer_phone} onChange={handleChange} readOnly={Boolean(retryOrder)} required className="mt-1 border-[#E3DCD2] focus:ring-[#D96C4A]" data-testid="input-phone" />
                       </div>
                     </div>
-                    <div>
-                      <Label htmlFor="delivery_address" className="text-sm font-medium text-[#2C241B]">Delivery Address *</Label>
-                      <Textarea name="delivery_address" value={form.delivery_address} onChange={handleChange} readOnly={Boolean(retryOrder)} required rows={3} className="mt-1 border-[#E3DCD2] focus:ring-[#D96C4A]" data-testid="input-address" />
-                    </div>
+                    {isDineIn ? (
+                      /* Nowhere to deliver to, so the branch stands in for the
+                         address rather than leaving a blank where one was. */
+                      <div className="rounded-xl border border-[#8A9A5B]/30 bg-[#8A9A5B]/[0.07] px-4 py-3" data-testid="dine-in-summary">
+                        <p className="text-xs uppercase tracking-[0.15em] text-[#5C5042] mb-1">Eating at</p>
+                        <p className="text-sm font-medium text-[#2C241B]">{outlet?.name}</p>
+                        {outlet?.address && (
+                          <p className="text-xs text-[#5C5042] mt-0.5 leading-relaxed">{outlet.address}</p>
+                        )}
+                        <Link to="/dine-in" className="inline-block mt-2 text-xs text-[#D96C4A] font-medium hover:underline">
+                          Change branch
+                        </Link>
+                      </div>
+                    ) : (
+                      <div>
+                        <Label htmlFor="delivery_address" className="text-sm font-medium text-[#2C241B]">Delivery Address *</Label>
+                        <Textarea name="delivery_address" value={form.delivery_address} onChange={handleChange} readOnly={Boolean(retryOrder)} required rows={3} className="mt-1 border-[#E3DCD2] focus:ring-[#D96C4A]" data-testid="input-address" />
+                      </div>
+                    )}
                     <div>
                       <Label htmlFor="notes" className="text-sm font-medium text-[#2C241B]">Order Notes</Label>
                       <Textarea name="notes" value={form.notes} onChange={handleChange} readOnly={Boolean(retryOrder)} rows={2} className="mt-1 border-[#E3DCD2] focus:ring-[#D96C4A]" placeholder="Special instructions..." data-testid="input-notes" />

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ShoppingBag, Menu, X, User, LogOut, ClipboardList } from "lucide-react";
+import { ShoppingBag, Menu, X, User, LogOut, ClipboardList, Store, Bike } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useFulfilment } from "@/contexts/FulfilmentContext";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
@@ -12,14 +13,20 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { itemCount } = useCart();
   const { user, logout } = useAuth();
+  const { mode, outlet, dineInAvailable } = useFulfilment();
   const location = useLocation();
   const isAdmin = location.pathname.startsWith("/admin");
 
   if (isAdmin) return null;
 
+  const signedIn = Boolean(user) && user !== false;
+
   const navLinks = [
     { to: "/", label: "Home" },
     { to: "/menu", label: "Menu" },
+    // Only worth offering to somebody who can actually place the order, and
+    // only while there is a branch to eat at.
+    ...(signedIn && dineInAvailable ? [{ to: "/dine-in", label: "Dine In" }] : []),
     { to: "/my-orders", label: "Orders" },
     { to: "/contact", label: "Contact" },
     { to: "/our-story", label: "Our Story" },
@@ -55,6 +62,18 @@ export default function Header() {
             </span>
           </div>
         </Link>
+
+        {mode && (
+          <Link
+            to="/dine-in"
+            className="hidden lg:inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.12em] font-medium text-[#5C5042] hover:text-[#D96C4A] border border-[#E3DCD2] rounded-full px-3 py-1.5 transition-colors"
+            title="Change how you receive your order"
+            data-testid="fulfilment-indicator"
+          >
+            {mode === "dine_in" ? <Store className="w-3.5 h-3.5" /> : <Bike className="w-3.5 h-3.5" />}
+            {mode === "dine_in" ? outlet?.name : "Delivery"}
+          </Link>
+        )}
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8" data-testid="desktop-nav">

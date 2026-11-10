@@ -3,6 +3,7 @@ import { Plus, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import http from "@/lib/http";
 import { API_BASE_URL as API } from "@/config/api";
+import { useFulfilment } from "@/contexts/FulfilmentContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -16,6 +17,7 @@ export default function ProductCard({ product, onSoldOut }) {
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || null);
   const [added, setAdded] = useState(false);
   const [checking, setChecking] = useState(false);
+  const { isDineIn, outlet } = useFulfilment();
   // What we learned by asking just now, which outranks the copy this page was
   // rendered from: the shop may have sold the last one since it loaded.
   const [soldOutSinceLoad, setSoldOutSinceLoad] = useState(false);
@@ -54,7 +56,8 @@ export default function ProductCard({ product, onSoldOut }) {
     // have been open since before the shop marked it out of stock.
     setChecking(true);
     try {
-      const { data } = await http.get(`${API}/api/products/${encodeURIComponent(product.id)}`);
+      const branch = isDineIn && outlet ? `?outlet=${encodeURIComponent(outlet.code)}` : "";
+      const { data } = await http.get(`${API}/api/products/${encodeURIComponent(product.id)}${branch}`);
       if (!data.is_available) {
         setSoldOutSinceLoad(true);
         onSoldOut?.(product.id);
