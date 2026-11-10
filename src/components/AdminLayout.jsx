@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
 import http from "@/lib/http";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, Package, ShoppingCart, MessageSquare, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, MessageSquare, LogOut, Store } from "lucide-react";
 import { API_BASE_URL as API } from "@/config/api";
 import ChaskaLoader from "@/components/ChaskaLoader";
+import { AdminScopeProvider, useAdminScope } from "@/contexts/AdminScopeContext";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export default function AdminLayout({ children }) {
+function AdminShell({ children }) {
   const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -25,6 +27,7 @@ export default function AdminLayout({ children }) {
     { to: "/admin/products", icon: Package, label: "Products" },
     { to: "/admin/orders", icon: ShoppingCart, label: "Orders" },
     { to: "/admin/contacts", icon: MessageSquare, label: "Messages" },
+    { to: "/admin/outlets", icon: Store, label: "Outlets" },
   ];
 
   if (loading) {
@@ -47,6 +50,11 @@ export default function AdminLayout({ children }) {
             </div>
           </Link>
         </div>
+        {/* Which counter every page below is about. Products and Orders both
+            read it, so switching here switches the whole panel rather than
+            each page carrying its own picker. */}
+        <ScopePicker />
+
         <nav className="flex-1 py-4 px-3 space-y-1">
           {navItems.map(item => {
             const active = location.pathname === item.to;
@@ -80,5 +88,35 @@ export default function AdminLayout({ children }) {
         {children}
       </main>
     </div>
+  );
+}
+
+function ScopePicker() {
+  const { scope, outlets, chooseScope } = useAdminScope();
+  return (
+    <div className="px-4 py-3 border-b border-[#E3DCD2]" data-testid="admin-scope-picker">
+      <p className="text-[10px] uppercase tracking-[0.15em] text-[#5C5042] mb-1.5">Managing</p>
+      <Select value={scope} onValueChange={chooseScope}>
+        <SelectTrigger className="h-9 text-sm bg-white border-[#E3DCD2]" data-testid="admin-scope-select">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="online">Online</SelectItem>
+          {outlets.map(outlet => (
+            <SelectItem key={outlet.code} value={outlet.code}>
+              {outlet.code} &middot; {outlet.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+export default function AdminLayout({ children }) {
+  return (
+    <AdminScopeProvider>
+      <AdminShell>{children}</AdminShell>
+    </AdminScopeProvider>
   );
 }

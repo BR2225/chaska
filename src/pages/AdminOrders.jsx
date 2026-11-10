@@ -3,17 +3,23 @@ import http from "@/lib/http";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { API_BASE_URL as API } from "@/config/api";
+import { useAdminScope } from "@/contexts/AdminScopeContext";
 
 const statusOptions = ["pending", "payment_pending", "confirmed", "preparing", "out_for_delivery", "delivered", "cancelled"];
 
 export default function AdminOrders() {
+  const { scope, scopeLabel } = useAdminScope();
   const [orders, setOrders] = useState([]);
   const [filterStatus, setFilterStatus] = useState("all");
 
+  // Narrowed to the counter being managed, so a branch sees its own queue
+  // rather than every order the business has taken.
   const load = useCallback(() => {
-    const params = filterStatus !== "all" ? `?status=${filterStatus}` : "";
-    http.get(`${API}/api/orders${params}`).then(r => setOrders(r.data)).catch(() => {});
-  }, [filterStatus]);
+    const query = new URLSearchParams();
+    if (filterStatus !== "all") query.set("status", filterStatus);
+    query.set("outlet", scope);
+    http.get(`${API}/api/orders?${query}`).then(r => setOrders(r.data)).catch(() => {});
+  }, [filterStatus, scope]);
   useEffect(() => { load(); }, [load]);
 
   const updateStatus = async (orderId, status) => {
@@ -29,7 +35,10 @@ export default function AdminOrders() {
   return (
     <div data-testid="admin-orders-page">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="font-['Cormorant_Garamond'] text-3xl font-medium text-[#2C241B]">Orders</h1>
+        <div>
+          <h1 className="font-['Cormorant_Garamond'] text-3xl font-medium text-[#2C241B]">Orders</h1>
+          <p className="text-sm text-[#5C5042] mt-0.5" data-testid="orders-scope-label">{scopeLabel}</p>
+        </div>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
           <SelectTrigger className="w-[180px] border-[#E3DCD2]" data-testid="order-status-filter">
             <SelectValue placeholder="Filter by status" />

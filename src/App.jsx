@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
+import { FulfilmentProvider } from "@/contexts/FulfilmentContext";
 import { Toaster } from "@/components/ui/sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -19,12 +20,14 @@ const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
 const AdminProducts = lazy(() => import("@/pages/AdminProducts"));
 const AdminOrders = lazy(() => import("@/pages/AdminOrders"));
 const AdminContacts = lazy(() => import("@/pages/AdminContacts"));
+const AdminOutlets = lazy(() => import("@/pages/AdminOutlets"));
 const TrackOrder = lazy(() => import("@/pages/TrackOrder"));
 const CustomerAuth = lazy(() => import("@/pages/CustomerAuth"));
 const MyOrders = lazy(() => import("@/pages/MyOrders"));
 const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 const OurStory = lazy(() => import("@/pages/OurStory"));
+const DineIn = lazy(() => import("@/pages/DineIn"));
 
 function PageFallback() {
   return <ChaskaLoader label="Loading Chaska" />;
@@ -34,6 +37,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <FulfilmentProvider>
         <CartProvider>
           <Toaster position="top-right" richColors />
           <Suspense fallback={<PageFallback />}>
@@ -48,6 +52,7 @@ function App() {
               <Route path="/login" element={<><Header /><CustomerAuth /><Footer /></>} />
               <Route path="/forgot-password" element={<><Header /><ForgotPassword /><Footer /></>} />
               <Route path="/reset-password" element={<><Header /><ResetPassword /><Footer /></>} />
+              <Route path="/dine-in" element={<><Header /><DineIn /><Footer /></>} />
               <Route path="/my-orders" element={<CustomerRoute><Header /><MyOrders /><Footer /></CustomerRoute>} />
               <Route path="/contact" element={<CustomerRoute><Header /><Contact /><Footer /></CustomerRoute>} />
 
@@ -57,9 +62,11 @@ function App() {
               <Route path="/admin/products" element={<AdminLayout><AdminProducts /></AdminLayout>} />
               <Route path="/admin/orders" element={<AdminLayout><AdminOrders /></AdminLayout>} />
               <Route path="/admin/contacts" element={<AdminLayout><AdminContacts /></AdminLayout>} />
+              <Route path="/admin/outlets" element={<AdminLayout><AdminOutlets /></AdminLayout>} />
             </Routes>
           </Suspense>
         </CartProvider>
+        </FulfilmentProvider>
       </AuthProvider>
     </BrowserRouter>
   );

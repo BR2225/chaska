@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import http from "@/lib/http";
 import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { API_BASE_URL as API } from "@/config/api";
+import { useAdminScope } from "@/contexts/AdminScopeContext";
 import VegMark from "@/components/VegMark";
 
 const emptyProduct = { name: "", category: "bomboloni", description: "", price: 0, image: "", images: [], sizes: [], is_available: true, featured: false };
@@ -19,6 +20,7 @@ const emptyProduct = { name: "", category: "bomboloni", description: "", price: 
 const toProductPayload = (p) => ({ name: p.name, category: p.category, description: p.description, price: p.price, image: p.image, images: p.images || [], sizes: p.sizes || [], is_available: p.is_available, featured: p.featured });
 
 export default function AdminProducts() {
+  const { scope, isOnline, scopeLabel, reloadOutlets } = useAdminScope();
   const [products, setProducts] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -26,8 +28,15 @@ export default function AdminProducts() {
   const [sizeInput, setSizeInput] = useState({ name: "", price: "" });
   const [updatingId, setUpdatingId] = useState(null);
 
-  const load = () => http.get(`${API}/api/products`).then(r => setProducts(r.data));
-  useEffect(() => { load(); }, []);
+  // Availability is read through whichever counter is selected, so the
+  // switches show that branch's stock rather than the online list.
+  const load = useCallback(
+    () => http
+      .get(`${API}/api/products${isOnline ? "" : `?outlet=${encodeURIComponent(scope)}`}`)
+      .then(r => setProducts(r.data)),
+    [isOnline, scope],
+  );
+  useEffect(() => { load(); }, [load]);
 
   const openNew = () => { setEditing(null); setForm(emptyProduct); setDialogOpen(true); };
   const openEdit = (p) => { setEditing(p.id); setForm(toProductPayload(p)); setDialogOpen(true); };
@@ -61,8 +70,18 @@ export default function AdminProducts() {
   const setAvailability = async (p, isAvailable) => {
     setUpdatingId(p.id);
     try {
-      await http.put(`${API}/api/products/${p.id}`, { ...toProductPayload(p), is_available: isAvailable });
-      toast.success(`${p.name} marked ${isAvailable ? "available" : "out of stock"}`);
+      if (isOnline) {
+        await http.put(`${API}/api/products/${p.id}`, { ...toProductPayload(p), is_available: isAvailable });
+      } else {
+        // One branch's counter, not the product itself: the same dessert can
+        // be on at Patia and off at the next branch.
+        await http.put(`${API}/api/admin/outlets/${scope}/stock`, {
+          product_id: p.id,
+          is_available: isAvailable,
+        });
+        await reloadOutlets();
+      }
+      toast.success(`${p.name} marked ${isAvailable ? "available" : "out of stock"} at ${scopeLabel}`);
       await load();
     } catch {
       toast.error("Failed to update stock status");

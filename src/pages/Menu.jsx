@@ -4,17 +4,27 @@ import http from "@/lib/http";
 import ProductCard from "@/components/ProductCard";
 import { API_BASE_URL as API } from "@/config/api";
 import ChaskaLoader from "@/components/ChaskaLoader";
+import { useFulfilment } from "@/contexts/FulfilmentContext";
+import { Store, Bike } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Menu() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const activeCategory = searchParams.get("category") || "all";
+  const { mode, outlet } = useFulfilment();
+  const outletCode = mode === "dine_in" ? outlet?.code : null;
 
   const lastLoadedAt = useRef(0);
 
   const loadProducts = useCallback(({ quiet } = {}) => {
-    const params = activeCategory !== "all" ? `?category=${activeCategory}` : "";
+    // Availability is per counter, so the branch has to go with the request
+    // or the menu shows the online stock list to somebody standing in a shop.
+    const query = new URLSearchParams();
+    if (activeCategory !== "all") query.set("category", activeCategory);
+    if (outletCode) query.set("outlet", outletCode);
+    const params = query.toString() ? `?${query}` : "";
     if (!quiet) setLoading(true);
     // Stamped before the request, not after: focus and visibilitychange both
     // fire when a tab is returned to, and a timestamp written on arrival would
@@ -24,7 +34,7 @@ export default function Menu() {
       .then(r => { setProducts(r.data); })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [activeCategory]);
+  }, [activeCategory, outletCode]);
 
   useEffect(() => { loadProducts(); }, [loadProducts]);
 
@@ -68,6 +78,22 @@ export default function Menu() {
         <h1 className="font-['Cormorant_Garamond'] text-4xl sm:text-5xl font-light text-[#2C241B] tracking-tighter mb-6">
           Discover Our Desserts
         </h1>
+
+        {/* Which counter this menu is showing. Availability differs between
+            branches, so leaving it unsaid invites ordering from the wrong one. */}
+        <Link
+          to="/dine-in"
+          className="inline-flex items-center gap-2 text-xs text-[#5C5042] hover:text-[#D96C4A] border border-[#E3DCD2] rounded-full px-4 py-2 mb-6 transition-colors"
+          data-testid="menu-fulfilment"
+        >
+          {mode === "dine_in" ? <Store className="w-3.5 h-3.5" /> : <Bike className="w-3.5 h-3.5" />}
+          {mode === "dine_in"
+            ? <>Showing what&apos;s on the counter at <span className="font-medium text-[#2C241B]">{outlet?.name}</span></>
+            : mode === "delivery"
+              ? <>Showing what we can <span className="font-medium text-[#2C241B]">deliver</span></>
+              : <>Choose <span className="font-medium text-[#2C241B]">delivery or dine in</span></>}
+          <span className="text-[#D96C4A] font-medium">Change</span>
+        </Link>
 
         {/* Category Filter */}
         <div className="flex flex-wrap gap-3" data-testid="category-filter">
