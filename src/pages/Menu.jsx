@@ -16,8 +16,12 @@ export default function Menu() {
   const loadProducts = useCallback(({ quiet } = {}) => {
     const params = activeCategory !== "all" ? `?category=${activeCategory}` : "";
     if (!quiet) setLoading(true);
+    // Stamped before the request, not after: focus and visibilitychange both
+    // fire when a tab is returned to, and a timestamp written on arrival would
+    // let the second one through while the first is still in flight.
+    lastLoadedAt.current = Date.now();
     return http.get(`${API}/api/products${params}`)
-      .then(r => { setProducts(r.data); lastLoadedAt.current = Date.now(); })
+      .then(r => { setProducts(r.data); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [activeCategory]);

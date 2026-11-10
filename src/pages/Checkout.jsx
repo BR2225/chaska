@@ -131,8 +131,13 @@ export default function Checkout() {
   // The cart can sit for a long time before anyone reaches this page, so check
   // it on arrival. The server refuses an out of stock item when the order is
   // placed, but that is after the whole form has been filled in.
+  // Keyed on what is in the cart rather than on the array itself: an empty
+  // cart hands back a fresh [] on every render, and depending on that would
+  // refire this effect, set state, render again, and never stop.
+  const cartKey = items.map(item => `${item.productId}:${item.size}`).sort().join("|");
+
   useEffect(() => {
-    if (retryOrderId || items.length === 0) { setSoldOut([]); return; }
+    if (retryOrderId || !cartKey) { setSoldOut(current => (current.length ? [] : current)); return; }
     let active = true;
     http.get(`${API}/api/products`)
       .then(({ data }) => {
@@ -144,7 +149,10 @@ export default function Checkout() {
       })
       .catch(() => { /* the server still refuses it at the end */ });
     return () => { active = false; };
-  }, [items, retryOrderId]);
+    // items is read inside but deliberately not a dependency; cartKey is its
+    // stable stand-in.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartKey, retryOrderId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
